@@ -1,0 +1,129 @@
+<html><head><base href="https://superweirdbiscuitbonanza.com/"><title>Super Weird Biscuit Bonanza</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Comic Neue', cursive;
+  transition: all 0.5s ease;
+}
+
+#cookie {
+  width: 200px;
+  height: 200px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#counter {
+  font-size: 24px;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.floater {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+@keyframes wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+@keyframes colorChange { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="counter">Kekse: 0</div>
+<svg id="cookie" viewBox="0 0 100 100" onclick="clickCookie()">
+  <circle cx="50" cy="50" r="45" fill="#D2691E" />
+  <circle cx="25" cy="25" r="7" fill="#8B4513" />
+  <circle cx="40" cy="70" r="7" fill="#8B4513" />
+  <circle cx="70" cy="35" r="7" fill="#8B4513" />
+</svg>
+
+<script>
+let cookies = 0;
+let weirdness = 0;
+const maxWeirdness = 100;
+const body = document.body;
+const cookie = document.getElementById('cookie');
+const counter = document.getElementById('counter');
+
+function clickCookie() {
+  cookies++;
+  weirdness = Math.min(weirdness + 1, maxWeirdness);
+  counter.innerText = `Kekse: ${cookies}`;
+  makeItWeird();
+}
+
+function makeItWeird() {
+  const effects = [
+    () => body.style.backgroundColor = `hsl(${weirdness * 3.6}, 70%, 80%)`,
+    () => cookie.style.transform = `rotate(${weirdness * 3.6}deg) scale(${1 + weirdness/100})`,
+    () => cookie.style.animation = 'spin 5s linear infinite',
+    () => counter.style.animation = 'bounce 0.5s ease infinite',
+    () => body.style.filter = `invert(${weirdness % 2})`,
+    () => addFloatingElement('🍪', 'emoji'),
+    () => body.style.transform = `skew(${weirdness}deg, ${weirdness}deg)`,
+    () => document.documentElement.style.setProperty('--random-rotation', `${Math.random() * 360}deg`),
+    () => body.style.transition = `all ${0.1 + weirdness/50}s cubic-bezier(${Math.random()}, ${Math.random()}, ${Math.random()}, ${Math.random()})`,
+    () => counter.style.fontSize = `${24 + weirdness}px`,
+    () => addFloatingElement('🌈', 'rainbow'),
+    () => body.style.animation = 'colorChange 5s linear infinite',
+    () => cookie.style.mixBlendMode = ['multiply', 'screen', 'overlay', 'darken', 'lighten'][weirdness % 5],
+    () => addFloatingElement('🎵', 'note'),
+    () => body.style.fontFamily = ['Arial', 'Courier', 'Times New Roman', 'Comic Sans MS', 'Impact'][weirdness % 5],
+    () => counter.style.writingMode = ['horizontal-tb', 'vertical-rl', 'vertical-lr'][weirdness % 3],
+    () => addFloatingElement('👁️', 'eye'),
+    () => body.style.perspective = `${100 + weirdness * 10}px`,
+    () => cookie.style.borderRadius = `${50 + weirdness/2}% ${50 - weirdness/2}% ${50 + weirdness/2}% ${50 - weirdness/2}%`,
+    () => counter.style.textShadow = `${weirdness/10}px ${weirdness/10}px ${weirdness/5}px rgba(255,0,0,0.5), ${-weirdness/10}px ${-weirdness/10}px ${weirdness/5}px rgba(0,0,255,0.5)`,
+    () => body.style.backdropFilter = `blur(${weirdness/10}px) brightness(${100 + weirdness}%)`,
+    () => addFloatingElement('🌀', 'spiral'),
+    () => cookie.style.filter = `hue-rotate(${weirdness * 3.6}deg) contrast(${100 + weirdness}%)`,
+    () => body.style.transform += ` rotate3d(1, 1, 1, ${weirdness}deg)`,
+    () => addFloatingElement('🍄', 'mushroom'),
+    () => counter.style.clipPath = `polygon(${50 + weirdness/2}% 0%, 100% ${50 + weirdness/2}%, ${50 - weirdness/2}% 100%, 0% ${50 - weirdness/2}%)`,
+    () => body.style.background = `repeating-radial-gradient(circle at ${weirdness}% ${100-weirdness}%, #ff99cc, #ff99cc 10px, #ffcc99 10px, #ffcc99 20px)`,
+    () => addFloatingElement('🎨', 'palette'),
+    () => cookie.style.boxShadow = `0 0 ${weirdness}px ${weirdness/2}px rgba(255,105,180,0.7)`,
+    () => body.style.animation += ', shake 0.5s ease infinite',
+  ];
+
+  // Apply multiple effects based on weirdness level
+  for (let i = 0; i < Math.min(weirdness, effects.length); i++) {
+    effects[i]();
+  }
+
+  if (weirdness === maxWeirdness) {
+    body.innerHTML = '<div style="font-size:72px;color:rainbow;animation:spin 1s linear infinite;">MAXIMUM WEIRDNESS ACHIEVED!</div>';
+  }
+}
+
+function addFloatingElement(content, className) {
+  const element = document.createElement('div');
+  element.textContent = content;
+  element.className = `floater ${className}`;
+  element.style.left = `${Math.random() * 100}vw`;
+  element.style.top = `${Math.random() * 100}vh`;
+  element.style.fontSize = `${20 + Math.random() * 30}px`;
+  element.style.animation = `spin ${3 + Math.random() * 5}s linear infinite, pulse ${1 + Math.random() * 2}s ease infinite`;
+  element.style.opacity = 0.7;
+  body.appendChild(element);
+
+  setTimeout(() => element.remove(), 5000 + Math.random() * 5000);
+}
+</script>
+</body></html>
