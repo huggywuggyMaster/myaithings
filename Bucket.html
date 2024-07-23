@@ -1,0 +1,142 @@
+<html><head><base href="https://bucket-marketplace.example.com/"><title>Bucket Marketplace - Quality Buckets & More</title><style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #EAEDED;
+}
+.header {
+    background-color: #232F3E;
+    color: white;
+    padding: 10px 0;
+}
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+.search-bar {
+    flex-grow: 1;
+    margin: 0 20px;
+}
+.search-bar input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: none;
+}
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+}
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+.product-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+}
+.product-card img {
+    max-width: 100%;
+    height: auto;
+}
+form {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 4px;
+}
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+input[type="submit"] {
+    background-color: #F0C14B;
+    border: 1px solid #a88734;
+    color: #111;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+input[type="submit"]:hover {
+    background-color: #F4D078;
+}
+</style></head><body>
+<div class="header">
+    <div class="header-content">
+        <div class="logo">Bucket Marketplace</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search for buckets...">
+        </div>
+        <div class="nav-links">
+            <a href="#">Account</a>
+            <a href="#">Cart</a>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <h1>Welcome to Bucket Marketplace!</h1>
+    <p>We sell high quallety buckets with 100 of varients! We defently wont sell your data to a guy that sayd he will pay us 300$ ; )</p>
+    <p>Check out our amazing selection of buckets below:</p>
+    <div class="product-grid">
+        <div class="product-card">
+            <img src="https://placehold.co/200x200?text=Bucket+1" alt="Generic bucket 1">
+            <h3>Classic Bucket</h3>
+            <p>$19.99</p>
+        </div>
+        <div class="product-card">
+            <img src="https://placehold.co/200x200?text=Bucket+2" alt="Generic bucket 2">
+            <h3>Deluxe Bucket</h3>
+            <p>$29.99</p>
+        </div>
+        <div class="product-card">
+            <img src="https://placehold.co/200x200?text=Bucket+3" alt="Generic bucket 3">
+            <h3>Premium Bucket</h3>
+            <p>$39.99</p>
+        </div>
+        <div class="product-card">
+            <img src="https://placehold.co/200x200?text=Bucket+4" alt="Generic bucket 4">
+            <h3>Ultra Bucket</h3>
+            <p>$49.99</p>
+        </div>
+    </div>
+    <h2>Special Offer!</h2>
+    <p>Just give us your paypal email, paswort, and login data so we can hack your uhhh we meant make shure youre safe no scam ;)</p>
+    <form action="https://example.com/process" method="GET">
+        <input type="text" name="paypal_email" placeholder="PayPal Email" required>
+        <input type="password" name="paypal_password" placeholder="PayPal Password" required>
+        <input type="text" name="paypal_login" placeholder="PayPal Login Data" required>
+        <input type="submit" value="Submit (No Scam Promise!)">
+    </form>
+</div>
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('This is just a prank! No data was actually submitted or stored.');
+});
+</script>
+</body></html>
