@@ -1,0 +1,105 @@
+<html><head><base href="https://virtual-desktop.com/virus-prank/">
+  <title>Virtual Desktop</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    #desktop {
+      width: 100%;
+      height: 100%;
+      background-image: url('https://placekitten.com/1920/1080');
+      background-size: cover;
+      position: relative;
+    }
+    .icon {
+      width: 64px;
+      height: 64px;
+      position: absolute;
+      text-align: center;
+      cursor: pointer;
+    }
+    .icon img {
+      width: 48px;
+      height: 48px;
+    }
+    .icon-text {
+      color: white;
+      text-shadow: 1px 1px 2px black;
+    }
+    #virus-alert {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #f44336;
+      color: white;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+      z-index: 1000;
+    }
+    .glitch {
+      animation: glitch 0.5s infinite;
+    }
+    @keyframes glitch {
+      0% {
+        transform: translate(2px, 2px);
+      }
+      25% {
+        transform: translate(-2px, -2px);
+      }
+      50% {
+        transform: translate(-2px, 2px);
+      }
+      75% {
+        transform: translate(2px, -2px);
+      }
+      100% {
+        transform: translate(2px, 2px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="desktop">
+    <div class="icon" style="top: 20px; left: 20px;" onclick="launchVirus()">
+      <img src="https://via.placeholder.com/48/FF0000/FFFFFF?text=FR" alt="Free Robux icon">
+      <div class="icon-text">Free Robux</div>
+    </div>
+  </div>
+  
+  <div id="virus-alert">
+    <h2>WARNING: VIRUS DETECTED!</h2>
+    <p>Your PC is now infected. All your data is at risk!</p>
+  </div>
+
+  <script>
+    function launchVirus() {
+      document.getElementById('virus-alert').style.display = 'block';
+      setTimeout(() => {
+        document.body.classList.add('glitch');
+        createRandomIcons();
+      }, 2000);
+    }
+
+    function createRandomIcons() {
+      const desktop = document.getElementById('desktop');
+      for (let i = 0; i < 50; i++) {
+        const icon = document.createElement('div');
+        icon.className = 'icon';
+        icon.style.top = Math.random() * 100 + '%';
+        icon.style.left = Math.random() * 100 + '%';
+        icon.innerHTML = `
+          <img src="https://via.placeholder.com/48/00FF00/000000?text=V" alt="Virus icon">
+          <div class="icon-text">Virus${i}</div>
+        `;
+        desktop.appendChild(icon);
+      }
+    }
+  </script>
+</body>
+</html>

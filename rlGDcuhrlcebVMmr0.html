@@ -1,0 +1,95 @@
+<html><head><base href="https://badsteam.example.com/">
+<title>BadSteam - Unoriginal and Boring Games</title>
+<style>
+  body { 
+    font-family: Arial, sans-serif;
+    background-color: #1b2838;
+    color: #c7d5e0;
+    margin: 0;
+    padding: 20px;
+  }
+  .game {
+    background-color: #2a475e;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  .buy-btn {
+    background-color: #66c0f4;
+    color: #1b2838;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  .game-container {
+    display: none;
+    margin-top: 20px;
+    border: 1px solid #66c0f4;
+    padding: 10px;
+  }
+</style>
+</head>
+<body>
+<h1>Welcome to BadSteam</h1>
+<p>Discover our collection of unoriginal, poorly made, and boring games!</p>
+
+<div class="game">
+  <h2>Tetrus</h2>
+  <p>A block-stacking game that's slightly off. The blocks never quite fit right.</p>
+  <button class="buy-btn" onclick="buyGame('tetrus')">Buy for $4.99</button>
+  <div id="tetrus-container" class="game-container">
+    <h3>Tetrus</h3>
+    <svg width="200" height="400" viewBox="0 0 200 400">
+      <rect width="200" height="400" fill="#000"/>
+      <rect x="80" y="0" width="40" height="40" fill="#ff0000"/>
+      <rect x="80" y="40" width="40" height="40" fill="#ff0000"/>
+      <rect x="120" y="0" width="40" height="40" fill="#ff0000"/>
+      <rect x="120" y="40" width="39" height="40" fill="#ff0000"/>
+    </svg>
+    <p>Click to rotate (it doesn't work)</p>
+  </div>
+</div>
+
+<div class="game">
+  <h2>Pac-Person</h2>
+  <p>Navigate a yellow circle through a maze. The ghosts are invisible and don't move.</p>
+  <button class="buy-btn" onclick="buyGame('pacperson')">Buy for $3.99</button>
+  <div id="pacperson-container" class="game-container">
+    <h3>Pac-Person</h3>
+    <svg width="200" height="200" viewBox="0 0 200 200">
+      <rect width="200" height="200" fill="#000"/>
+      <circle cx="100" cy="100" r="20" fill="#ffff00"/>
+      <rect x="0" y="0" width="200" height="20" fill="#0000ff"/>
+      <rect x="0" y="180" width="200" height="20" fill="#0000ff"/>
+      <rect x="0" y="0" width="20" height="200" fill="#0000ff"/>
+      <rect x="180" y="0" width="20" height="200" fill="#0000ff"/>
+    </svg>
+    <p>Use arrow keys to move (they don't work)</p>
+  </div>
+</div>
+
+<div class="game">
+  <h2>Minesniffer</h2>
+  <p>Click on squares to reveal numbers. All squares are always 1.</p>
+  <button class="buy-btn" onclick="buyGame('minesniffer')">Buy for $2.99</button>
+  <div id="minesniffer-container" class="game-container">
+    <h3>Minesniffer</h3>
+    <svg width="150" height="150" viewBox="0 0 150 150">
+      <rect width="150" height="150" fill="#c0c0c0"/>
+      <line x1="0" y1="50" x2="150" y2="50" stroke="#808080" stroke-width="2"/>
+      <line x1="0" y1="100" x2="150" y2="100" stroke="#808080" stroke-width="2"/>
+      <line x1="50" y1="0" x2="50" y2="150" stroke="#808080" stroke-width="2"/>
+      <line x1="100" y1="0" x2="100" y2="150" stroke="#808080" stroke-width="2"/>
+    </svg>
+    <p>Click to reveal (always shows 1)</p>
+  </div>
+</div>
+
+<script>
+function buyGame(game) {
+  alert("Thank you for wasting your money on " + game + "!");
+  document.getElementById(game + "-container").style.display = "block";
+}
+</script>
+
+</body></html>
