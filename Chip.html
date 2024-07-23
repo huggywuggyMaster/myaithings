@@ -1,0 +1,109 @@
+<html><head><base href="https://meme-religion.com/">
+<title>Chip Church: Embrace the Crisp Enlightenment</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive;
+    background: linear-gradient(to bottom, #FFD700, #FFA500);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  header {
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+  }
+  h1 {
+    color: #FF4500;
+    text-shadow: 2px 2px #FFD700;
+  }
+  .chip-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 50px 0;
+  }
+  .chip {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 5 L95 50 L50 95 L5 50 Z" fill="%23FFB266" stroke="%23FF8000" stroke-width="5"/></svg>') no-repeat center center;
+    background-size: contain;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .halo {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    border: 5px solid #FFD700;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.7; }
+  }
+  .cta {
+    background-color: #FF4500;
+    color: white;
+    font-size: 24px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .cta:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 69, 0, 0.7);
+  }
+  .disclaimer {
+    font-size: 10px;
+    color: #666;
+    max-width: 80%;
+    text-align: center;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Welcome to the Church of the Holy Chip</h1>
+  </header>
+  
+  <div class="chip-container">
+    <div class="chip"></div>
+    <div class="halo"></div>
+  </div>
+  
+  <h2>Embrace the Crisp Enlightenment!</h2>
+  
+  <p>Are you tired of stale beliefs? Craving a crunchier spiritual experience?</p>
+  
+  <form action="/donate" method="GET">
+    <button class="cta">Donate Now for Eternal Crispness!</button>
+  </form>
+  
+  <p class="disclaimer">
+    *Disclaimer: The Church of the Holy Chip is not responsible for any spiritual indigestion, monetary losses, or sudden urges to dip yourself in various sauces. All donations are non-refundable and will be used for the greater good of chip-kind. Side effects may include increased snacking, chanting "crunch crunch crunch" in your sleep, and the inability to pass a vending machine without genuflecting. By donating, you agree to forfeit your soul to the Great Chip in the Sky.
+  </p>
+
+  <script>
+    document.querySelector('.cta').addEventListener('click', function(e) {
+      e.preventDefault();
+      alert("Congratulations! You've been blessed by the Holy Chip. Your eternal crispness is pending payment processing. Please enter your credit card details, social security number, and the secret password to your heart.");
+    });
+  </script>
+</body>
+</html>
