@@ -1,0 +1,125 @@
+<html><head><base href=""><style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+}
+#container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+.logo {
+    position: absolute;
+    width: 100px;
+    height: 50px;
+    border-radius: 10px;
+}
+#addLogo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#addLogo:hover {
+    background-color: #45a049;
+}
+</style></head><body>
+<div id="container">
+    <button id="addLogo">Add Logo</button>
+</div>
+
+<script>
+const container = document.getElementById('container');
+const addLogoButton = document.getElementById('addLogo');
+const logos = [];
+
+class Logo {
+    constructor(x, y) {
+        this.element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        this.element.setAttribute("width", "100");
+        this.element.setAttribute("height", "50");
+        this.element.setAttribute("viewBox", "0 0 100 50");
+        this.element.innerHTML = `
+            <path d="M10,25 C10,15 20,5 35,5 H65 C80,5 90,15 90,25 C90,35 80,45 65,45 H35 C20,45 10,35 10,25 Z" fill="${this.randomColor()}" />
+            <text x="50" y="30" font-family="Arial" font-size="20" fill="white" text-anchor="middle" dominant-baseline="middle">DVD</text>
+        `;
+        this.element.classList.add('logo');
+        container.appendChild(this.element);
+
+        this.x = x;
+        this.y = y;
+        this.dx = (Math.random() - 0.5) * 4;
+        this.dy = (Math.random() - 0.5) * 4;
+        this.width = 100;
+        this.height = 50;
+    }
+
+    randomColor() {
+        return `hsl(${Math.random() * 360}, 100%, 50%)`;
+    }
+
+    update() {
+        this.x += this.dx;
+        this.y += this.dy;
+
+        if (this.x < 0 || this.x + this.width > container.clientWidth) {
+            this.dx = -this.dx;
+            this.element.querySelector('path').setAttribute('fill', this.randomColor());
+        }
+        if (this.y < 0 || this.y + this.height > container.clientHeight) {
+            this.dy = -this.dy;
+            this.element.querySelector('path').setAttribute('fill', this.randomColor());
+        }
+
+        this.element.style.transform = `translate(${this.x}px, ${this.y}px)`;
+    }
+
+    checkCollision(other) {
+        if (this === other) return;
+
+        const dx = this.x - other.x;
+        const dy = this.y - other.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < this.width) {
+            // Collision detected, swap velocities
+            [this.dx, other.dx] = [other.dx, this.dx];
+            [this.dy, other.dy] = [other.dy, this.dy];
+
+            // Change colors
+            this.element.querySelector('path').setAttribute('fill', this.randomColor());
+            other.element.querySelector('path').setAttribute('fill', other.randomColor());
+        }
+    }
+}
+
+function addLogo() {
+    const x = Math.random() * (container.clientWidth - 100);
+    const y = Math.random() * (container.clientHeight - 50);
+    logos.push(new Logo(x, y));
+}
+
+function animate() {
+    logos.forEach(logo => {
+        logo.update();
+        logos.forEach(otherLogo => logo.checkCollision(otherLogo));
+    });
+    requestAnimationFrame(animate);
+}
+
+addLogoButton.addEventListener('click', addLogo);
+
+// Add initial logo
+addLogo();
+
+animate();
+</script>
+</body></html>
