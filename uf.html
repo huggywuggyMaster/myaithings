@@ -1,0 +1,109 @@
+<html><head><base href="https://example.com/">
+<title>Totally Secure Data Vault</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4285F4;
+    margin-bottom: 20px;
+  }
+  .upload-form {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .btn {
+    background-color: #4285F4;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .btn:hover {
+    background-color: #3367D6;
+  }
+  .hidden {
+    display: none;
+  }
+  .warning {
+    color: #D32F2F;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  .casino {
+    background-color: #4CAF50;
+    padding: 20px;
+    border-radius: 8px;
+    color: #fff;
+    margin-top: 20px;
+  }
+  .bitcoin {
+    background-color: #FF9800;
+    padding: 20px;
+    border-radius: 8px;
+    color: #fff;
+    margin-top: 20px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Totally Secure Data Vault</div>
+    <div class="upload-form">
+      <h2>Upload Your Personal Data</h2>
+      <p>We promise to keep it super safe and definitely won't do anything nefarious with it!</p>
+      <form id="dataForm" method="GET" action="https://example.com/upload">
+        <input type="file" id="dataFile" name="dataFile" multiple>
+        <button type="submit" class="btn">Upload Now</button>
+      </form>
+    </div>
+    <div id="scamWarning" class="warning hidden">
+      <h3>Oops! You've Been Scammed!</h3>
+      <p>Unfortunately, all your personal data and money are now in the hands of scammers. But don't worry, we have some great opportunities for you!</p>
+    </div>
+    <div id="casino" class="casino hidden">
+      <h3>Try Your Luck at our Casino!</h3>
+      <p>You're already in the red, so why not try to win it all back?</p>
+      <button class="btn" onclick="playCasino()">Play Now</button>
+    </div>
+    <div id="bitcoin" class="bitcoin hidden">
+      <h3>Invest in Bitcoin!</h3>
+      <p>The totally foolproof way to recover your losses!</p>
+      <button class="btn" onclick="investBitcoin()">Invest Now</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('dataForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      setTimeout(() => {
+        document.getElementById('scamWarning').classList.remove('hidden');
+        document.getElementById('casino').classList.remove('hidden');
+      }, 2000);
+    });
+
+    function playCasino() {
+      alert("Sorry, you've lost all your remaining money!");
+      document.getElementById('bitcoin').classList.remove('hidden');
+    }
+
+    function investBitcoin() {
+      alert("Congratulations! You've just invested in a highly volatile cryptocurrency. Good luck!");
+    }
+  </script>
+</body>
+</html>
