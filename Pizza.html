@@ -1,0 +1,100 @@
+<html><head><base href="https://pizzaism.org/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Pizzaism: The Cheesiest Religion</title><style>
+body {
+    font-family: 'Comic Sans MS', cursive;
+    background: linear-gradient(to bottom, #FFA500, #FF4500);
+    color: #FFFFFF;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    font-size: 3em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+.pizza-slice {
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    animation: spin 10s linear infinite;
+}
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+.button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.button:hover {
+    background-color: #45a049;
+}
+#tithe-form {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+#rick-morty {
+    max-width: 300px;
+    margin: 20px auto;
+}
+</style></head><body>
+<h1>🍕 Welcome to Pizzaism 🍕</h1>
+
+<svg class="pizza-slice" viewBox="0 0 100 100">
+    <path d="M50 0 L100 87 A50 50 0 0 1 0 87 Z" fill="#FFA500" stroke="#8B4513" stroke-width="2"/>
+    <circle cx="30" cy="50" r="5" fill="#FF0000"/>
+    <circle cx="50" cy="70" r="5" fill="#008000"/>
+    <circle cx="70" cy="40" r="5" fill="#000000"/>
+</svg>
+
+<p>Are you tired of boring, crusty old religions? Join Pizzaism, where our beliefs are always hot, fresh, and delivered in 30 minutes or less!</p>
+
+<h2>The Holy Pizzble</h2>
+<p>And lo, the Great Pizza Maker said, "Let there be crust," and it was crispy and good. He topped it with sauce, for it pleased Him. And on the third day, He created cheese, and saw that it was gooey.</p>
+
+<button class="button" onclick="alert('You have been blessed with infinite toppings!')">Receive Pizza Blessing</button>
+
+<h2>Tithe to the Pizza Gods</h2>
+<p>Remember, the more dough you give, the more blessed your pizza will be!</p>
+<form id="tithe-form" method="GET" action="https://pizzaism.org/tithe">
+    <label for="credit-card">Credit Card Number:</label><br>
+    <input type="text" id="credit-card" name="credit-card" required><br>
+    <label for="expiry">Expiry Date:</label><br>
+    <input type="text" id="expiry" name="expiry" required><br>
+    <label for="cvv">CVV:</label><br>
+    <input type="text" id="cvv" name="cvv" required><br>
+    <input type="submit" class="button" value="Submit Tithe">
+</form>
+
+<h2>Words of Wisdom from our Interdimensional Prophets</h2>
+<img id="rick-morty" src="https://rickandmortyapi.com/api/character/avatar/1.jpeg" alt="Rick Sanchez from Rick and Morty, animated style, wearing a pizza-themed outfit" width="300" height="300">
+<p>"Wubba lubba dub dub! I turned myself into a pizza, Morty! I'm Pizza Rick!"</p>
+
+<script>
+document.querySelector('#tithe-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert("Congratulations! You've been specially selected for our Premium Platinum Diamond Pizza Paradise membership! Only 9999.99 per month. Check your bank statement for automatic enrollment.");
+});
+
+let blessings = [
+    "May your crust always be crispy!",
+    "Blessed are the cheesemakers!",
+    "Go forth and multiply... your toppings!",
+    "In crust we trust!",
+    "Let he who is without olives cast the first stone!"
+];
+
+document.querySelector('.button').addEventListener('click', function() {
+    alert(blessings[Math.floor(Math.random() * blessings.length)]);
+});
+</script>
+</body></html>
