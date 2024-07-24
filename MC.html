@@ -1,0 +1,293 @@
+<html><head><base href="https://playminecraft.io">
+<title>MineCraft FPS WebSim</title>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Minecraft', sans-serif;
+}
+
+#game-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#hud {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: white;
+    font-size: 18px;
+    text-shadow: 2px 2px #000;
+}
+
+#inventory {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.inventory-slot {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+}
+
+#crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+#crosshair::before, #crosshair::after {
+    content: '';
+    position: absolute;
+    background-color: white;
+}
+
+#crosshair::before {
+    width: 2px;
+    height: 20px;
+    left: 9px;
+}
+
+#crosshair::after {
+    width: 20px;
+    height: 2px;
+    top: 9px;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="game-container">
+    <div id="hud">
+        Health: <span id="health">20</span> | Food: <span id="food">20</span>
+    </div>
+    <div id="inventory">
+        <div class="inventory-slot">🟫</div>
+        <div class="inventory-slot">🪵</div>
+        <div class="inventory-slot">🪨</div>
+        <div class="inventory-slot">⛏️</div>
+    </div>
+    <div id="crosshair"></div>
+</div>
+
+<script>
+// Initialize Three.js
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('game-container').appendChild(renderer.domElement);
+
+// Set background color to light blue
+scene.background = new THREE.Color(0x87CEEB);
+
+// Create sun
+const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+const sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
+sunMesh.position.set(50, 100, -100);
+sunMesh.name = "sun";
+scene.add(sunMesh);
+
+// Add ambient light
+const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.6);
+scene.add(ambientLight);
+
+// Add directional light (sun light)
+const sunLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
+sunLight.position.set(50, 100, -100);
+scene.add(sunLight);
+
+// Create ground
+const groundGeometry = new THREE.PlaneGeometry(100, 100);
+const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+const groundMesh = new THREE.Mesh(groundGeometry, groundMaterial);
+groundMesh.rotation.x = -Math.PI / 2;
+groundMesh.name = "ground";
+scene.add(groundMesh);
+
+// Create player
+const playerHeight = 1.8;
+const playerWidth = 0.6;
+camera.position.set(0, playerHeight, 0);
+
+// Load block texture
+const textureLoader = new THREE.TextureLoader();
+const blockTexture = textureLoader.load('https://i.imgur.com/YOliv2s.jpeg');
+
+// Create blocks
+function createBlock(x, y, z) {
+    const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const blockMaterial = new THREE.MeshLambertMaterial({ map: blockTexture });
+    const blockMesh = new THREE.Mesh(blockGeometry, blockMaterial);
+    blockMesh.position.set(x, y, z);
+    blockMesh.name = "block";
+    scene.add(blockMesh);
+}
+
+// Player movement and rotation
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
+
+const onKeyDown = function (event) {
+    switch (event.code) {
+        case 'KeyW': moveForward = true; break;
+        case 'KeyS': moveBackward = true; break;
+        case 'KeyA': moveLeft = true; break;
+        case 'KeyD': moveRight = true; break;
+    }
+};
+
+const onKeyUp = function (event) {
+    switch (event.code) {
+        case 'KeyW': moveForward = false; break;
+        case 'KeyS': moveBackward = false; break;
+        case 'KeyA': moveLeft = false; break;
+        case 'KeyD': moveRight = false; break;
+    }
+};
+
+document.addEventListener('keydown', onKeyDown);
+document.addEventListener('keyup', onKeyUp);
+
+// Mouse look
+const pitchObject = new THREE.Object3D();
+pitchObject.add(camera);
+
+const yawObject = new THREE.Object3D();
+yawObject.position.y = playerHeight;
+yawObject.add(pitchObject);
+
+scene.add(yawObject);
+
+const PI_2 = Math.PI / 2;
+
+const onMouseMove = function (event) {
+    if (document.pointerLockElement === document.body) {
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        yawObject.rotation.y -= movementX * 0.002;
+        pitchObject.rotation.x -= movementY * 0.002;
+
+        pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, pitchObject.rotation.x));
+    }
+};
+
+document.addEventListener('mousemove', onMouseMove);
+
+// Request pointer lock
+document.getElementById('game-container').addEventListener('click', function () {
+    document.body.requestPointerLock();
+});
+
+// Player movement
+const velocity = new THREE.Vector3();
+const direction = new THREE.Vector3();
+
+function movePlayer(delta) {
+    velocity.x -= velocity.x * 10.0 * delta;
+    velocity.z -= velocity.z * 10.0 * delta;
+
+    direction.z = Number(moveForward) - Number(moveBackward);
+    direction.x = Number(moveLeft) - Number(moveRight);
+    direction.normalize();
+
+    if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
+    if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
+
+    const oldPosition = yawObject.position.clone();
+
+    yawObject.translateX(velocity.x * delta);
+    yawObject.translateZ(velocity.z * delta);
+
+    // Collision detection
+    const playerBoundingBox = new THREE.Box3().setFromCenterAndSize(
+        yawObject.position,
+        new THREE.Vector3(playerWidth, playerHeight, playerWidth)
+    );
+
+    const collisionObjects = scene.children.filter(obj => obj.name === "block");
+    
+    for (const obj of collisionObjects) {
+        const blockBoundingBox = new THREE.Box3().setFromObject(obj);
+        if (playerBoundingBox.intersectsBox(blockBoundingBox)) {
+            yawObject.position.copy(oldPosition);
+            break;
+        }
+    }
+}
+
+// Handle block placement and removal
+document.addEventListener('mousedown', (e) => {
+    if (document.pointerLockElement === document.body) {
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(new THREE.Vector2(), camera);
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        if (intersects.length > 0) {
+            const intersectedObject = intersects[0].object;
+            
+            if (e.button === 2) { // Right click (place block)
+                if (intersectedObject.name !== "sun") {
+                    const intersectionPoint = intersects[0].point;
+                    const normalVector = intersects[0].face.normal;
+                    const blockPosition = intersectionPoint.add(normalVector.multiplyScalar(0.5));
+
+                    createBlock(Math.round(blockPosition.x), Math.round(blockPosition.y), Math.round(blockPosition.z));
+                }
+            } else if (e.button === 0) { // Left click (remove block)
+                if (intersectedObject.name === "block") {
+                    scene.remove(intersectedObject);
+                }
+            }
+        }
+    }
+});
+
+// Prevent context menu from appearing on right-click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Animation loop
+const clock = new THREE.Clock();
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    const delta = clock.getDelta();
+
+    movePlayer(delta);
+
+    renderer.render(scene, camera);
+}
+
+animate();
+
+// Handle window resizing
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body></html>
