@@ -1,0 +1,633 @@
+<html><head><base href="https://i.imgur.com/" ><style>
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.os-container {
+    background-image: url('YUf9Npk.png');
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.taskbar {
+    background-color: rgba(0, 0, 0, 0.7);
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.start-button {
+    background-color: #0078D7;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.start-button:hover {
+    background-color: #005fa3;
+}
+
+.desktop {
+    flex-grow: 1;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    grid-gap: 20px;
+    align-content: start;
+}
+
+.icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.icon:hover {
+    transform: scale(1.05);
+}
+
+.icon img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 5px;
+}
+
+.icon-label {
+    font-size: 12px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.window {
+    position: absolute;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    width: 400px;
+    height: 300px;
+    display: none;
+    overflow: hidden;
+}
+
+.window-header {
+    background-color: #0078D7;
+    color: white;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+}
+
+.window-content {
+    padding: 15px;
+    height: calc(100% - 40px);
+    overflow-y: auto;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-button:hover {
+    color: #ff4d4d;
+}
+
+.clock {
+    color: white;
+    margin-left: auto;
+    font-size: 14px;
+}
+
+#terminalWindow .window-content {
+    background-color: #000;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#terminalOutput {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+#terminalInputLine {
+    display: flex;
+    align-items: center;
+}
+
+#terminalPrompt {
+    color: #0f0;
+    margin-right: 5px;
+}
+
+#terminalInput {
+    background-color: transparent;
+    color: #0f0;
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    font-family: monospace;
+}
+
+input[type="text"], button {
+    margin: 5px 0;
+    padding: 5px;
+}
+
+button {
+    background-color: #0078D7;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #005fa3;
+}
+
+#storeWindow .window-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.store-item {
+    width: 100px;
+    text-align: center;
+    margin: 10px;
+    cursor: pointer;
+    position: relative;
+}
+
+.store-item img {
+    width: 64px;
+    height: 64px;
+    opacity: 0.5;
+}
+
+.store-item-name {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.store-item-price {
+    font-size: 10px;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.store-item::after {
+    content: "🔒";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #ff4d4d;
+}
+
+#walletInfo {
+    text-align: right;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #ff4d4d;
+}
+
+.start-menu {
+    position: fixed;
+    bottom: 40px;
+    left: 0;
+    width: 250px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-top-right-radius: 5px;
+    display: none;
+    z-index: 1001;
+}
+
+.start-menu-item {
+    color: white;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.start-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.start-menu-item img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.party-mode {
+    animation: partyTime 10s infinite linear;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+@keyframes partyTime {
+    0% { transform: rotate3d(1, 1, 1, 0deg); }
+    100% { transform: rotate3d(1, 1, 1, 360deg); }
+}
+
+.flying-taskbar {
+    animation: flyUp 2s forwards;
+}
+
+@keyframes flyUp {
+    to { transform: translateY(-100vh); }
+}
+
+.party-window {
+    position: absolute;
+    width: 200px;
+    height: 150px;
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
+    border-radius: 10px;
+    opacity: 0.8;
+    animation: windowParty 5s infinite alternate;
+}
+
+@keyframes windowParty {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(100px, 100px) rotate(360deg); }
+}
+</style></head><body>
+<div class="os-container" id="osContainer">
+    <div class="desktop">
+        <div class="icon" onclick="openWindow('mycomputer')">
+            <img src="https://cdn-icons-png.flaticon.com/128/9723/9723494.png" alt="My Computer icon">
+            <span class="icon-label">My Computer</span>
+        </div>
+        <div class="icon" onclick="openWindow('documents')">
+            <img src="https://cdn-icons-png.flaticon.com/128/2965/2965319.png" alt="Documents icon">
+            <span class="icon-label">Documents</span>
+        </div>
+        <div class="icon" onclick="openWindow('settings')">
+            <img src="https://cdn-icons-png.flaticon.com/128/563/563541.png" alt="Settings icon">
+            <span class="icon-label">Settings</span>
+        </div>
+        <div class="icon" onclick="openWindow('terminal')">
+            <img src="https://cdn-icons-png.flaticon.com/128/2235/2235325.png" alt="Terminal icon">
+            <span class="icon-label">Terminal</span>
+        </div>
+        <div class="icon" onclick="openWindow('store')">
+            <img src="https://cdn-icons-png.flaticon.com/128/3081/3081559.png" alt="Icrysosoft Store icon">
+            <span class="icon-label">Icrysosoft Store</span>
+        </div>
+        <div class="icon" onclick="activateFreeRobux()">
+            <img src="https://cdn-icons-png.flaticon.com/128/5692/5692030.png" alt="Free Robux icon">
+            <span class="icon-label">Free Robux</span>
+        </div>
+    </div>
+    
+    <div class="taskbar" id="taskbar">
+        <button class="start-button" onclick="toggleStartMenu()">Start</button>
+        <div class="clock" id="clock"></div>
+    </div>
+    
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-item" onclick="openWindow('mycomputer')">
+            <img src="https://cdn-icons-png.flaticon.com/128/9723/9723494.png" alt="My Computer icon">
+            My Computer
+        </div>
+        <div class="start-menu-item" onclick="openWindow('documents')">
+            <img src="https://cdn-icons-png.flaticon.com/128/2965/2965319.png" alt="Documents icon">
+            Documents
+        </div>
+        <div class="start-menu-item" onclick="openWindow('settings')">
+            <img src="https://cdn-icons-png.flaticon.com/128/563/563541.png" alt="Settings icon">
+            Settings
+        </div>
+        <div class="start-menu-item" onclick="openWindow('terminal')">
+            <img src="https://cdn-icons-png.flaticon.com/128/2235/2235325.png" alt="Terminal icon">
+            Terminal
+        </div>
+        <div class="start-menu-item" onclick="openWindow('store')">
+            <img src="https://cdn-icons-png.flaticon.com/128/3081/3081559.png" alt="Icrysosoft Store icon">
+            Icrysosoft Store
+        </div>
+        <div class="start-menu-item" onclick="powerOff()">
+            <img src="https://cdn-icons-png.flaticon.com/128/5974/5974771.png" alt="Power Off icon">
+            Power Off
+        </div>
+    </div>
+
+    <div id="mycomputerWindow" class="window">
+        <div class="window-header">
+            <span>My Computer</span>
+            <button class="close-button" onclick="closeWindow('mycomputer')">×</button>
+        </div>
+        <div class="window-content">
+            <h3>System Information</h3>
+            <p>OS: Cosmic OS</p>
+            <p>Version: 1.0</p>
+            <p>Memory: 16 GB</p>
+            <p>Processor: Quantum Core i7</p>
+            <h3>User Settings</h3>
+            <p>Current User: <span id="currentUsername">cosmic_user</span></p>
+            <input type="text" id="newUsername" placeholder="New username">
+            <button onclick="changeUsername()">Change Username</button>
+        </div>
+    </div>
+    
+    <div id="documentsWindow" class="window">
+        <div class="window-header">
+            <span>Documents</span>
+            <button class="close-button" onclick="closeWindow('documents')">×</button>
+        </div>
+        <div class="window-content">
+            <h3>Recent Documents</h3>
+            <ul>
+                <li>Project Nebula.doc</li>
+                <li>Galactic Maps.pdf</li>
+                <li>Starship Maintenance.txt</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div id="settingsWindow" class="window">
+        <div class="window-header">
+            <span>Settings</span>
+            <button class="close-button" onclick="closeWindow('settings')">×</button>
+        </div>
+        <div class="window-content">
+            <h3>System Settings</h3>
+            <p><input type="checkbox" id="darkMode"> Enable Dark Mode</p>
+            <p><input type="checkbox" id="notifications"> Enable Notifications</p>
+            <p>Volume: <input type="range" min="0" max="100" value="50"></p>
+        </div>
+    </div>
+
+    <div id="terminalWindow" class="window">
+        <div class="window-header">
+            <span>Terminal</span>
+            <button class="close-button" onclick="closeWindow('terminal')">×</button>
+        </div>
+        <div class="window-content">
+            <div id="terminalOutput">Welcome to Cosmic OS Terminal</div>
+            <div id="terminalInputLine">
+                <span id="terminalPrompt">user@cosmic:~$</span>
+                <input type="text" id="terminalInput" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <div id="storeWindow" class="window">
+        <div class="window-header">
+            <span>Icrysosoft Store</span>
+            <button class="close-button" onclick="closeWindow('store')">×</button>
+        </div>
+        <div class="window-content">
+            <div id="walletInfo">Wallet: $0.00</div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/128/2920/2920277.png" alt="Cosmic Explorer">
+                <div class="store-item-name">Cosmic Explorer</div>
+                <div class="store-item-price">$9.99</div>
+            </div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/128/3208/3208615.png" alt="Stellar Office">
+                <div class="store-item-name">Stellar Office</div>
+                <div class="store-item-price">$19.99</div>
+            </div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/128/2991/2991112.png" alt="Galactic Games">
+                <div class="store-item-name">Galactic Games</div>
+                <div class="store-item-price">$14.99</div>
+            </div>
+            <div class="store-item">
+                <img src="https://cdn-icons-png.flaticon.com/128/1378/1378598.png" alt="Nebula Chat">
+                <div class="store-item-name">Nebula Chat</div>
+                <div class="store-item-price">$4.99</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentUsername = 'cosmic_user';
+let wallet = 0;
+
+function openWindow(windowName) {
+    document.getElementById(windowName + 'Window').style.display = 'block';
+    if (windowName === 'terminal') {
+        document.getElementById('terminalInput').focus();
+    }
+    document.getElementById('startMenu').style.display = 'none';
+}
+
+function closeWindow(windowName) {
+    document.getElementById(windowName + 'Window').style.display = 'none';
+}
+
+function changeUsername() {
+    const newUsername = document.getElementById('newUsername').value;
+    if (newUsername.trim() !== '') {
+        currentUsername = newUsername;
+        document.getElementById('currentUsername').textContent = currentUsername;
+        document.getElementById('terminalPrompt').textContent = `${currentUsername}@cosmic:~$`;
+        document.getElementById('newUsername').value = '';
+        alert('Username changed successfully!');
+    } else {
+        alert('Please enter a valid username.');
+    }
+}
+
+function toggleStartMenu() {
+    const startMenu = document.getElementById('startMenu');
+    startMenu.style.display = startMenu.style.display === 'none' ? 'block' : 'none';
+}
+
+function powerOff() {
+    if (confirm('Are you sure you want to power off?')) {
+        document.body.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: black; color: white; font-size: 24px;">Powering off...</div>';
+        setTimeout(() => {
+            document.body.style.backgroundColor = 'black';
+            document.body.innerHTML = '';
+        }, 2000);
+    }
+}
+
+// Make windows draggable
+const windows = document.querySelectorAll('.window');
+windows.forEach(makeWindowDraggable);
+
+function makeWindowDraggable(element) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    element.querySelector('.window-header').onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        element.style.top = (element.offsetTop - pos2) + "px";
+        element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+// Clock functionality
+function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('clock').textContent = timeString;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+// Terminal functionality
+const terminalInput = document.getElementById('terminalInput');
+const terminalOutput = document.getElementById('terminalOutput');
+
+terminalInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        const command = this.value;
+        terminalOutput.innerHTML += `<br>${currentUsername}@cosmic:~$ ${command}`;
+        
+        // Process command
+        if (command === 'help') {
+            terminalOutput.innerHTML += '<br>Available commands: help, date, clear, echo, whoami, wallet';
+        } else if (command === 'date') {
+            terminalOutput.innerHTML += '<br>' + new Date().toLocaleString();
+        } else if (command === 'clear') {
+            terminalOutput.innerHTML = 'Welcome to Cosmic OS Terminal';
+        } else if (command.startsWith('echo ')) {
+            terminalOutput.innerHTML += '<br>' + command.slice(5);
+        } else if (command === 'whoami') {
+            terminalOutput.innerHTML += '<br>' + currentUsername;
+        } else if (command === 'wallet') {
+            terminalOutput.innerHTML += `<br>Your wallet balance: $${wallet.toFixed(2)}`;
+        } else {
+            terminalOutput.innerHTML += '<br>Command not found: ' + command;
+        }
+        
+        this.value = '';
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+});
+
+// Focus terminal input when clicking anywhere in the terminal window
+document.getElementById('terminalWindow').addEventListener('click', function() {
+    terminalInput.focus();
+});
+
+// Store functionality
+const storeItems = document.querySelectorAll('.store-item');
+storeItems.forEach(item => {
+    item.addEventListener('click', function() {
+        const appName = this.querySelector('.store-item-name').textContent;
+        const appPrice = parseFloat(this.querySelector('.store-item-price').textContent.slice(1));
+        if (wallet >= appPrice) {
+            wallet -= appPrice;
+            updateWallet();
+            alert(`Successfully purchased ${appName} for $${appPrice.toFixed(2)}!`);
+        } else {
+            alert(`Sorry, you don't have enough funds to purchase ${appName}. You need $${appPrice.toFixed(2)}, but you only have $${wallet.toFixed(2)}.`);
+        }
+    });
+});
+
+function updateWallet() {
+    document.getElementById('walletInfo').textContent = `Wallet: $${wallet.toFixed(2)}`;
+}
+
+updateWallet();
+
+// Close start menu when clicking outside
+document.addEventListener('click', function(event) {
+    const startMenu = document.getElementById('startMenu');
+    const startButton = document.querySelector('.start-button');
+    if (!startMenu.contains(event.target) && event.target !== startButton) {
+        startMenu.style.display = 'none';
+    }
+});
+
+function activateFreeRobux() {
+    const osContainer = document.getElementById('osContainer');
+    const taskbar = document.getElementById('taskbar');
+    
+    // Make taskbar fly up
+    taskbar.classList.add('flying-taskbar');
+    
+    // Create party windows
+    for (let i = 0; i < 10; i++) {
+        const partyWindow = document.createElement('div');
+        partyWindow.className = 'party-window';
+        partyWindow.style.left = `${Math.random() * window.innerWidth}px`;
+        partyWindow.style.top = `${Math.random() * window.innerHeight}px`;
+        osContainer.appendChild(partyWindow);
+    }
+    
+    // Activate party mode
+    setTimeout(() => {
+        osContainer.classList.add('party-mode');
+        
+        // Create more party windows over time
+        const intervalId = setInterval(() => {
+            const partyWindow = document.createElement('div');
+            partyWindow.className = 'party-window';
+            partyWindow.style.left = `${Math.random() * window.innerWidth}px`;
+            partyWindow.style.top = `${Math.random() * window.innerHeight}px`;
+            osContainer.appendChild(partyWindow);
+        }, 1000);
+        
+        // Stop creating windows after 10 seconds
+        setTimeout(() => {
+            clearInterval(intervalId);
+        }, 10000);
+    }, 2000);
+    
+    // Play party sound
+    const audio = new Audio('https://soundbible.com/mp3/Party%20Horn-SoundBible.com-964386362.mp3');
+    audio.play();
+}
+</script>
+</body></html>
