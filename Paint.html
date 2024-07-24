@@ -1,0 +1,190 @@
+<html><head><base href="https://crabby-paint-program.com/">
+<title>CrabbyPaint Pro™ - The Most Frustrating Paint Experience!</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', cursive;
+    background-color: #ffcccc;
+    color: #660000;
+    overflow: hidden;
+  }
+  #canvas-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+  }
+  #paint-canvas {
+    border: 5px dashed #ff0000;
+    cursor: not-allowed;
+    box-shadow: 0 0 20px rgba(255,0,0,0.5);
+  }
+  #toolbar {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #ffff00;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255,255,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: rotate(-5deg);
+  }
+  .tool-btn {
+    margin: 5px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #00ff00;
+    color: #ff00ff;
+    border: 3px solid #ff00ff;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    width: 100px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .tool-btn:hover {
+    background-color: #ff00ff;
+    color: #00ff00;
+    transform: scale(1.05) rotate(5deg);
+  }
+  .tool-btn.active {
+    background-color: #ff0000;
+    color: #ffff00;
+    animation: shake 0.5s infinite;
+  }
+  @keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }
+  #ad-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 0, 0.8);
+    padding: 10px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff0000;
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  #paywall {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #paywall-content {
+    background-color: #ffff00;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  #paywall-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: #ff00ff;
+    color: #ffff00;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button class="tool-btn active" id="pencil-btn">Pencil ($0.99/use)</button>
+  <button class="tool-btn" id="eraser-btn">Eraser ($1.99/use)</button>
+  <button class="tool-btn" id="fill-btn">Fill ($4.99/use)</button>
+  <button class="tool-btn" id="shape-btn">Shape ($9.99/use)</button>
+  <button class="tool-btn" id="clear-btn">Clear ($19.99/use)</button>
+</div>
+<div id="canvas-container">
+  <canvas id="paint-canvas" width="800" height="600"></canvas>
+</div>
+<div id="ad-container">
+  HOT SINGLES IN YOUR AREA WANT TO PAINT WITH YOU! CLICK HERE NOW!!!
+</div>
+<div id="paywall">
+  <div id="paywall-content">
+    <h2>Oops! You've run out of free strokes!</h2>
+    <p>Upgrade to CrabbyPaint Pro™ for only $99.99/month to continue painting!</p>
+    <button id="paywall-btn">UPGRADE NOW!</button>
+  </div>
+</div>
+
+<script>
+  let strokeCount = 0;
+  const maxFreeStrokes = 5;
+
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      alert(`You've been charged for using the ${this.textContent} tool! Check your credit card statement.`);
+    });
+  });
+
+  document.getElementById('paint-canvas').addEventListener('mousemove', function(e) {
+    if (Math.random() < 0.1) {
+      this.style.cursor = 'none';
+    } else {
+      this.style.cursor = 'crosshair';
+    }
+  });
+
+  document.getElementById('paint-canvas').addEventListener('click', function() {
+    strokeCount++;
+    if (strokeCount >= maxFreeStrokes) {
+      document.getElementById('paywall').style.display = 'flex';
+    }
+  });
+
+  document.getElementById('paywall-btn').addEventListener('click', function() {
+    alert("Thank you for your purchase! We've already charged your card. Enjoy your 'premium' experience!");
+    document.getElementById('paywall').style.display = 'none';
+    strokeCount = 0;
+  });
+
+  setInterval(() => {
+    const ads = [
+      "DOCTORS HATE THIS ONE WEIRD PAINTING TRICK!",
+      "EARN $5000/DAY PAINTING FROM HOME!",
+      "THIS PAINTING APP WILL MAKE YOU CRY!",
+      "10 PAINTING SECRETS THE GOVERNMENT DOESN'T WANT YOU TO KNOW!"
+    ];
+    document.getElementById('ad-container').textContent = ads[Math.floor(Math.random() * ads.length)];
+  }, 3000);
+
+  // Randomly rotate the canvas for extra frustration
+  setInterval(() => {
+    document.getElementById('paint-canvas').style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+  }, 5000);
+</script>
+</body>
+</html>
