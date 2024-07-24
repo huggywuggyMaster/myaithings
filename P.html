@@ -1,0 +1,531 @@
+<html><head><base href="https://websimco.com/physics-sandbox/">
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #1a1a1a;
+    font-family: Arial, sans-serif;
+  }
+  #canvas {
+    width: 100%;
+    height: 100vh;
+  }
+  #controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  button {
+    margin: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #gravity-slider {
+    width: 100px;
+  }
+</style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="controls">
+    <button onclick="addCircle()">Add Circle</button>
+    <button onclick="addRectangle()">Add Rectangle</button>
+    <button onclick="addRandomThing()">Add Random Thing</button>
+    <button onclick="addDuck()">Add Duck</button>
+    <button onclick="toggleWaterDraw()">Toggle Water Draw</button>
+    <button onclick="toggleSandDraw()">Toggle Sand Draw</button>
+    <button onclick="toggleSeedDraw()">Toggle Seed Draw</button>
+    <button onclick="addTNT()">Add TNT</button>
+    <button onclick="clearObjects()">Clear All</button>
+    <br>
+    <label for="gravity-slider">Gravity:</label>
+    <input type="range" id="gravity-slider" min="-10" max="10" value="1" step="0.1" oninput="updateGravity()">
+    <span id="gravity-value">1</span>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+  <script>
+    const Engine = Matter.Engine,
+          Render = Matter.Render,
+          Runner = Matter.Runner,
+          Bodies = Matter.Bodies,
+          Composite = Matter.Composite,
+          Mouse = Matter.Mouse,
+          MouseConstraint = Matter.MouseConstraint,
+          Vertices = Matter.Vertices,
+          Body = Matter.Body,
+          Events = Matter.Events,
+          Vector = Matter.Vector;
+
+    const engine = Engine.create();
+    const world = engine.world;
+
+    const canvas = document.getElementById('canvas');
+    const render = Render.create({
+      canvas: canvas,
+      engine: engine,
+      options: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        wireframes: false,
+        background: '#1a1a1a'
+      }
+    });
+
+    Render.run(render);
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: {
+        stiffness: 0.2,
+        render: {
+          visible: false
+        }
+      }
+    });
+
+    Composite.add(world, mouseConstraint);
+    render.mouse = mouse;
+
+    const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight, window.innerWidth, 60, { isStatic: true });
+    const leftWall = Bodies.rectangle(0, window.innerHeight / 2, 60, window.innerHeight, { isStatic: true });
+    const rightWall = Bodies.rectangle(window.innerWidth, window.innerHeight / 2, 60, window.innerHeight, { isStatic: true });
+    const ceiling = Bodies.rectangle(window.innerWidth / 2, 0, window.innerWidth, 60, { isStatic: true });
+
+    Composite.add(world, [ground, leftWall, rightWall, ceiling]);
+
+    let isDrawingWater = false;
+    let isDrawingSand = false;
+    let isDrawingSeed = false;
+    const waterParticles = [];
+    const sandParticles = [];
+    const seedParticles = [];
+    const plantParticles = [];
+    const waterParticleSize = 10;
+    const sandParticleSize = 5;
+    const seedParticleSize = 8;
+    const plantParticleSize = 10;
+
+    const waterParticleOptions = {
+      friction: 0.05,
+      restitution: 0.3,
+      density: 0.99,
+      render: {
+        fillStyle: 'rgba(0, 100, 255, 0.3)'
+      },
+      isWater: true
+    };
+
+    const sandParticleOptions = {
+      friction: 0.5,
+      restitution: 0.2,
+      density: 0.8,
+      render: {
+        fillStyle: '#D2B48C'
+      }
+    };
+
+    const seedParticleOptions = {
+      friction: 0.3,
+      restitution: 0.4,
+      density: 0.7,
+      render: {
+        fillStyle: '#8B4513'
+      },
+      isSeed: true
+    };
+
+    const plantParticleOptions = {
+      friction: 0.1,
+      restitution: 0.1,
+      density: 0.5,
+      isStatic: true,
+      render: {
+        fillStyle: '#228B22'
+      },
+      isPlant: true
+    };
+
+    function toggleWaterDraw() {
+      isDrawingWater = !isDrawingWater;
+      const button = document.querySelector('button:nth-child(5)');
+      button.textContent = isDrawingWater ? 'Stop Water Draw' : 'Toggle Water Draw';
+    }
+
+    function toggleSandDraw() {
+      isDrawingSand = !isDrawingSand;
+      const button = document.querySelector('button:nth-child(6)');
+      button.textContent = isDrawingSand ? 'Stop Sand Draw' : 'Toggle Sand Draw';
+    }
+
+    function toggleSeedDraw() {
+      isDrawingSeed = !isDrawingSeed;
+      const button = document.querySelector('button:nth-child(7)');
+      button.textContent = isDrawingSeed ? 'Stop Seed Draw' : 'Toggle Seed Draw';
+    }
+
+    function addWaterParticle(x, y) {
+      const particle = Bodies.circle(x, y, waterParticleSize / 2, waterParticleOptions);
+      waterParticles.push(particle);
+      Composite.add(world, particle);
+    }
+
+    function addSandParticle(x, y) {
+      const particle = Bodies.circle(x, y, sandParticleSize / 2, sandParticleOptions);
+      sandParticles.push(particle);
+      Composite.add(world, particle);
+    }
+
+    function addSeedParticle(x, y) {
+      const particle = Bodies.circle(x, y, seedParticleSize / 2, seedParticleOptions);
+      seedParticles.push(particle);
+      Composite.add(world, particle);
+    }
+
+    function addPlantParticle(x, y) {
+      const particle = Bodies.circle(x, y, plantParticleSize / 2, plantParticleOptions);
+      plantParticles.push(particle);
+      Composite.add(world, particle);
+    }
+
+    Events.on(mouseConstraint, 'mousemove', function(event) {
+      if (isDrawingWater && mouse.button === 0) {
+        addWaterParticle(event.mouse.position.x, event.mouse.position.y);
+      }
+      if (isDrawingSand && mouse.button === 0) {
+        for (let i = 0; i < 3; i++) {
+          const offsetX = (Math.random() - 0.5) * 10;
+          const offsetY = (Math.random() - 0.5) * 10;
+          addSandParticle(event.mouse.position.x + offsetX, event.mouse.position.y + offsetY);
+        }
+      }
+      if (isDrawingSeed && mouse.button === 0) {
+        addSeedParticle(event.mouse.position.x, event.mouse.position.y);
+      }
+    });
+
+    Events.on(engine, 'collisionStart', (event) => {
+      const pairs = event.pairs;
+      pairs.forEach((pair) => {
+        const bodyA = pair.bodyA;
+        const bodyB = pair.bodyB;
+
+        if ((bodyA.isWater && bodyB.isSeed) || (bodyA.isSeed && bodyB.isWater)) {
+          const seed = bodyA.isSeed ? bodyA : bodyB;
+          const water = bodyA.isWater ? bodyA : bodyB;
+          growPlant(seed.position.x, seed.position.y);
+          Composite.remove(world, seed);
+          Composite.remove(world, water);
+          waterParticles.splice(waterParticles.indexOf(water), 1);
+        }
+
+        if ((bodyA.isWater && bodyB.isPlant) || (bodyA.isPlant && bodyB.isWater)) {
+          const plant = bodyA.isPlant ? bodyA : bodyB;
+          const water = bodyA.isWater ? bodyA : bodyB;
+          growPlant(plant.position.x, plant.position.y - plantParticleSize / 2);
+          Composite.remove(world, water);
+          waterParticles.splice(waterParticles.indexOf(water), 1);
+        }
+
+        if (bodyA.isTNT || bodyB.isTNT) {
+          const tnt = bodyA.isTNT ? bodyA : bodyB;
+          explodeTNT(tnt);
+        }
+      });
+    });
+
+    function growPlant(x, y) {
+      addPlantParticle(x, y);
+    }
+
+    function addCircle() {
+      const circle = Bodies.circle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        Math.random() * 20 + 10,
+        {
+          restitution: 0.8,
+          friction: 0.005,
+          render: {
+            fillStyle: `hsl(${Math.random() * 360}, 80%, 60%)`
+          }
+        }
+      );
+      Composite.add(world, circle);
+    }
+
+    function addRectangle() {
+      const rectangle = Bodies.rectangle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        Math.random() * 60 + 20,
+        Math.random() * 60 + 20,
+        {
+          restitution: 0.6,
+          friction: 0.01,
+          render: {
+            fillStyle: `hsl(${Math.random() * 360}, 80%, 60%)`
+          }
+        }
+      );
+      Composite.add(world, rectangle);
+    }
+
+    function addRandomThing() {
+      const randomThings = [
+        createStar,
+        createCloud,
+        createTree,
+        createHeart
+      ];
+      const randomThing = randomThings[Math.floor(Math.random() * randomThings.length)];
+      randomThing();
+    }
+
+    function createStar() {
+      const starVertices = Vertices.fromPath('0 50 15 15 50 0 85 15 100 50 85 85 50 100 15 85');
+      const star = Bodies.fromVertices(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        starVertices,
+        {
+          restitution: 0.6,
+          friction: 0.01,
+          render: {
+            fillStyle: `hsl(${Math.random() * 360}, 80%, 60%)`
+          }
+        }
+      );
+      Composite.add(world, star);
+    }
+
+    function createCloud() {
+      const cloudBody = Bodies.circle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        40,
+        {
+          restitution: 0.4,
+          friction: 0.01,
+          render: {
+            sprite: {
+              texture: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M25,60 Q30,50 40,55 Q50,45 60,55 Q70,50 75,60 Q85,60 85,70 Q85,80 75,80 L30,80 Q20,80 20,70 Q20,60 25,60" fill="white"/></svg>',
+              xScale: 1,
+              yScale: 1
+            }
+          }
+        }
+      );
+      Composite.add(world, cloudBody);
+    }
+
+    function createTree() {
+      const trunkHeight = 60;
+      const trunkWidth = 20;
+      const leavesRadius = 40;
+
+      const trunk = Bodies.rectangle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        trunkWidth,
+        trunkHeight,
+        {
+          render: { fillStyle: '#8B4513' }
+        }
+      );
+
+      const leaves = Bodies.circle(
+        trunk.position.x,
+        trunk.position.y - (trunkHeight / 2) - (leavesRadius / 2),
+        leavesRadius,
+        {
+          render: { fillStyle: '#228B22' }
+        }
+      );
+
+      const tree = Body.create({
+        parts: [trunk, leaves],
+        restitution: 0.2,
+        friction: 0.1
+      });
+
+      Composite.add(world, tree);
+    }
+
+    function createHeart() {
+      const heartVertices = Vertices.fromPath('25 50 L 0 25 Q 0 0 25 0 L 50 25 L 75 0 Q 100 0 100 25 L 75 50 Q 50 75 25 50');
+      const heart = Bodies.fromVertices(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        heartVertices,
+        {
+          restitution: 0.6,
+          friction: 0.01,
+          render: {
+            fillStyle: '#FF69B4'
+          }
+        }
+      );
+      Composite.add(world, heart);
+    }
+
+    function addDuck() {
+      const duckSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="bodyGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+              <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+            </radialGradient>
+          </defs>
+          <g transform="translate(0,20)">
+            <ellipse cx="100" cy="100" rx="80" ry="70" fill="url(#bodyGradient)" />
+            <ellipse cx="140" cy="80" rx="50" ry="40" fill="url(#bodyGradient)" />
+            <path d="M160,70 Q180,60 190,80 Q180,90 160,85 Z" fill="#FF6347" />
+            <circle cx="155" cy="70" r="8" fill="#000000" />
+            <path d="M40,120 Q10,140 30,160 Q50,170 70,150 Z" fill="#FF8C00" />
+          </g>
+        </svg>
+      `;
+
+      const duckBody = Bodies.circle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        50,
+        {
+          restitution: 0.5,
+          friction: 0.01,
+          render: {
+            sprite: {
+              texture: 'data:image/svg+xml;base64,' + btoa(duckSVG),
+              xScale: 1,
+              yScale: 1
+            }
+          }
+        }
+      );
+      Composite.add(world, duckBody);
+    }
+
+    function addTNT() {
+      const tntSVG = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+          <rect x="10" y="10" width="80" height="80" fill="#FF0000" />
+          <text x="50" y="60" font-family="Arial" font-size="24" fill="white" text-anchor="middle">TNT</text>
+        </svg>
+      `;
+
+      const tnt = Bodies.rectangle(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        50,
+        50,
+        {
+          restitution: 0.5,
+          friction: 0.01,
+          render: {
+            sprite: {
+              texture: 'data:image/svg+xml;base64,' + btoa(tntSVG),
+              xScale: 1,
+              yScale: 1
+            }
+          },
+          isTNT: true,
+          isExploded: false
+        }
+      );
+      Composite.add(world, tnt);
+    }
+
+    function explodeTNT(tnt) {
+      if (tnt.isExploded) return;
+      tnt.isExploded = true;
+
+      // Create fire particles
+      for (let i = 0; i < 50; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const magnitude = Math.random() * 5 + 2;
+        const fireParticle = Bodies.circle(
+          tnt.position.x,
+          tnt.position.y,
+          3,
+          {
+            restitution: 0.8,
+            friction: 0.001,
+            render: {
+              fillStyle: `rgb(${Math.floor(Math.random() * 100 + 155)}, ${Math.floor(Math.random() * 100)}, 0)`
+            },
+            collisionFilter: {
+              group: -1
+            },
+            isFireParticle: true
+          }
+        );
+        Body.setVelocity(fireParticle, Vector.create(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude));
+        Composite.add(world, fireParticle);
+
+        setTimeout(() => {
+          Composite.remove(world, fireParticle);
+        }, 1000);
+      }
+
+      // Explosion force
+      setTimeout(() => {
+        const bodies = Composite.allBodies(world);
+        bodies.forEach(body => {
+          if (body !== tnt && !body.isStatic) {
+            const force = Vector.sub(body.position, tnt.position);
+            const distance = Vector.magnitude(force);
+            if (distance < 200) {
+              const magnitude = 0.05 * (200 - distance);
+              Body.applyForce(body, body.position, Vector.mult(Vector.normalise(force), magnitude));
+            }
+          }
+        });
+
+        Composite.remove(world, tnt);
+      }, 500);
+    }
+
+    function clearObjects() {
+      const bodies = Composite.allBodies(world);
+      bodies.forEach(body => {
+        if (!body.isStatic || body.isPlant) {
+          Composite.remove(world, body);
+        }
+      });
+      waterParticles.length = 0;
+      sandParticles.length = 0;
+      seedParticles.length = 0;
+      plantParticles.length = 0;
+    }
+
+    function updateGravity() {
+      const gravityValue = parseFloat(document.getElementById('gravity-slider').value);
+      engine.world.gravity.y = gravityValue;
+      document.getElementById('gravity-value').textContent = gravityValue.toFixed(1);
+    }
+
+    window.addEventListener('resize', () => {
+      render.canvas.width = window.innerWidth;
+      render.canvas.height = window.innerHeight;
+      Matter.Body.setPosition(ground, Matter.Vector.create(window.innerWidth / 2, window.innerHeight));
+      Matter.Body.setPosition(leftWall, Matter.Vector.create(0, window.innerHeight / 2));
+      Matter.Body.setPosition(rightWall, Matter.Vector.create(window.innerWidth, window.innerHeight / 2));
+      Matter.Body.setPosition(ceiling, Matter.Vector.create(window.innerWidth / 2, 0));
+    });
+
+    // Add initial objects
+    for (let i = 0; i < 10; i++) {
+      addRandomThing();
+    }
+  </script>
+</body></html>
