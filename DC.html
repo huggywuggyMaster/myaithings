@@ -1,0 +1,269 @@
+<html><head><base href="https://discord-clone.money/"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MoneyChat - Earn While You Chat!</title><style>
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #36393f;
+    color: #dcddde;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+#app {
+    display: flex;
+    height: 100%;
+}
+#sidebar {
+    width: 240px;
+    background-color: #2f3136;
+    padding: 20px;
+    overflow-y: auto;
+}
+#main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+#chat {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+#input-area {
+    padding: 20px;
+    background-color: #40444b;
+}
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #40444b;
+    color: #dcddde;
+}
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #40444b;
+    border-radius: 5px;
+}
+.user {
+    font-weight: bold;
+    color: #7289da;
+}
+.system {
+    font-weight: bold;
+    color: #43b581;
+}
+#wallet {
+    padding: 10px;
+    background-color: #202225;
+    text-align: center;
+    font-size: 18px;
+}
+#upgrades {
+    margin-top: 20px;
+}
+.upgrade-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #7289da;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.upgrade-btn:hover {
+    background-color: #5b6eae;
+}
+#event-display {
+    padding: 10px;
+    margin-top: 20px;
+    background-color: #202225;
+    border-radius: 5px;
+    text-align: center;
+}
+.shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+}
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+.rainbow {
+    animation: rainbow 5s linear infinite;
+}
+@keyframes rainbow {
+    0% { color: red; }
+    14% { color: orange; }
+    28% { color: yellow; }
+    42% { color: green; }
+    57% { color: blue; }
+    71% { color: indigo; }
+    85% { color: violet; }
+    100% { color: red; }
+}
+</style></head><body>
+<div id="app">
+    <div id="sidebar">
+        <div id="wallet">Wallet: $<span id="money">0</span></div>
+        <div id="upgrades">
+            <button class="upgrade-btn" id="armor-upgrade">Upgrade Armor ($50)</button>
+            <button class="upgrade-btn" id="message-upgrade">Upgrade Messages ($100)</button>
+        </div>
+        <div id="event-display">No active events</div>
+    </div>
+    <div id="main">
+        <div id="chat"></div>
+        <div id="input-area">
+            <form id="message-form" method="GET" action="https://discord-clone.money/send">
+                <input type="text" id="message-input" name="message" placeholder="Type a message..." autocomplete="off">
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let money = 0;
+let armorLevel = 0;
+let messageValue = 1;
+let eventActive = false;
+
+function updateWallet() {
+    document.getElementById('money').textContent = money;
+}
+
+function addMessage(message, isSystem = false) {
+    const chat = document.getElementById('chat');
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    messageElement.innerHTML = isSystem 
+        ? `<span class="system">System:</span> ${message}`
+        : `<span class="user">You:</span> ${message}`;
+    chat.appendChild(messageElement);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function triggerRandomEvent() {
+    if (eventActive) return;
+    
+    const events = [
+        { 
+            name: "Money Rain", 
+            duration: 15, 
+            effect: () => { 
+                messageValue *= 3; 
+                document.getElementById('money').classList.add('rainbow');
+            },
+            endEffect: () => {
+                messageValue /= 3;
+                document.getElementById('money').classList.remove('rainbow');
+            }
+        },
+        { 
+            name: "Hacker Attack", 
+            duration: 10, 
+            effect: () => { 
+                money = Math.max(0, money - 100); 
+                document.body.classList.add('shake');
+            },
+            endEffect: () => {
+                document.body.classList.remove('shake');
+            }
+        },
+        { 
+            name: "Lucky Emojis", 
+            duration: 20, 
+            effect: () => { 
+                const emojis = ['💰', '🤑', '💎', '🏆'];
+                const oldSendMessage = window.sendMessage;
+                window.sendMessage = (msg) => oldSendMessage(msg + ' ' + emojis[Math.floor(Math.random() * emojis.length)]);
+            },
+            endEffect: () => {
+                window.sendMessage = (msg) => addMessage(msg);
+            }
+        },
+        { 
+            name: "Charity Drive", 
+            duration: 30, 
+            effect: () => { 
+                const oldUpdateWallet = updateWallet;
+                updateWallet = () => {
+                    oldUpdateWallet();
+                    money = Math.floor(money * 0.9);  // Donate 10% of money each update
+                    document.getElementById('money').textContent = money;
+                };
+            },
+            endEffect: () => {
+                updateWallet = () => {
+                    document.getElementById('money').textContent = money;
+                };
+            }
+        }
+    ];
+
+    const event = events[Math.floor(Math.random() * events.length)];
+    eventActive = true;
+    
+    addMessage(`A random event has occurred: ${event.name}!`, true);
+    document.getElementById('event-display').textContent = `Active: ${event.name}`;
+    
+    event.effect();
+    
+    setTimeout(() => {
+        eventActive = false;
+        event.endEffect();
+        document.getElementById('event-display').textContent = 'No active events';
+        addMessage(`The "${event.name}" event has ended.`, true);
+    }, event.duration * 1000);
+}
+
+window.sendMessage = (msg) => addMessage(msg);
+
+document.getElementById('message-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    if (message) {
+        window.sendMessage(message);
+        money += messageValue;
+        updateWallet();
+        input.value = '';
+        
+        if (Math.random() < 0.2) { // 20% chance of triggering an event
+            triggerRandomEvent();
+        }
+    }
+});
+
+document.getElementById('armor-upgrade').addEventListener('click', function() {
+    if (money >= 50) {
+        money -= 50;
+        armorLevel++;
+        updateWallet();
+        this.textContent = `Upgrade Armor ($${50 * (armorLevel + 1)})`;
+        addMessage(`Armor upgraded to level ${armorLevel}!`, true);
+    } else {
+        addMessage("Not enough money to upgrade armor!", true);
+    }
+});
+
+document.getElementById('message-upgrade').addEventListener('click', function() {
+    if (money >= 100) {
+        money -= 100;
+        messageValue++;
+        updateWallet();
+        this.textContent = `Upgrade Messages ($${100 * messageValue})`;
+        addMessage(`Message value increased to $${messageValue} per message!`, true);
+    } else {
+        addMessage("Not enough money to upgrade message value!", true);
+    }
+});
+
+updateWallet();
+</script></body></html>
