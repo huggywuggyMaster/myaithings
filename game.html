@@ -1,0 +1,646 @@
+<html><head><base href="https://pewpew.pp">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PewPew Space Shooter - Extreme Hardcore with Even More Creative Ads</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: Arial, sans-serif;
+  }
+  #game-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="black"/><circle cx="10" cy="10" r="1" fill="white" /><circle cx="50" cy="30" r="0.8" fill="white" /><circle cx="90" cy="60" r="1.2" fill="white" /><circle cx="130" cy="90" r="0.7" fill="white" /><circle cx="170" cy="120" r="1.1" fill="white" /></svg>');
+    animation: scrollBackground 5s linear infinite;
+  }
+  @keyframes scrollBackground {
+    from { background-position: 0 0; }
+    to { background-position: 0 200px; }
+  }
+  #spaceship {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    transition: left 0.05s ease-out;
+    z-index: 1000;
+  }
+  .laser {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background-color: #ff0;
+    transition: top 0.2s linear;
+    z-index: 900;
+  }
+  .enemy {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    transition: top 0.8s linear, transform 0.2s ease-in-out;
+    z-index: 800;
+  }
+  #score, #lives {
+    position: absolute;
+    top: 10px;
+    color: #fff;
+    font-size: 20px;
+    z-index: 1100;
+  }
+  #score { left: 10px; }
+  #lives { right: 10px; }
+  #game-over, #level-up {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 48px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 2000;
+  }
+  .powerup {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    transition: top 1.5s linear;
+    z-index: 700;
+  }
+  #difficulty {
+    position: absolute;
+    top: 40px;
+    left: 10px;
+    color: #f00;
+    font-size: 16px;
+    z-index: 1100;
+  }
+  @keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }
+  .shake {
+    animation: shake 0.5s;
+    animation-iteration-count: infinite;
+  }
+  .ad {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 4px solid;
+    padding: 20px;
+    font-size: 24px;
+    color: #000;
+    z-index: 500;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  }
+  .ad-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 30px;
+  }
+  @keyframes moveAround {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(100px, 100px) rotate(90deg); }
+    50% { transform: translate(0, 200px) rotate(180deg); }
+    75% { transform: translate(-100px, 100px) rotate(270deg); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  @keyframes rainbow {
+    0% { color: red; }
+    14% { color: orange; }
+    28% { color: yellow; }
+    42% { color: green; }
+    57% { color: blue; }
+    71% { color: indigo; }
+    85% { color: violet; }
+    100% { color: red; }
+  }
+  .rainbow-text {
+    animation: rainbow 5s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .spin {
+    animation: spin 5s linear infinite;
+  }
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-30px); }
+    60% { transform: translateY(-15px); }
+  }
+  .bounce {
+    animation: bounce 2s infinite;
+  }
+  @keyframes floatAround {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(50px, -50px); }
+    50% { transform: translate(-50px, -100px); }
+    75% { transform: translate(-100px, 50px); }
+  }
+  .float {
+    animation: floatAround 10s infinite ease-in-out;
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <div id="score">Score: <span id="score-value">0</span></div>
+  <div id="lives">Lives: <span id="lives-value">3</span></div>
+  <div id="difficulty">Difficulty: Extreme Hardcore with Even More Creative Ads</div>
+  <svg id="spaceship" viewBox="0 0 100 100">
+    <path d="M50 10 L90 90 L50 70 L10 90 Z" fill="#0ff" />
+  </svg>
+  <div id="game-over">Game Over!<br><button onclick="restartGame()">Play Again</button></div>
+  <div id="level-up">Level Up!<br><button onclick="continuePlaying()">Continue</button></div>
+</div>
+
+<script>
+const gameContainer = document.getElementById('game-container');
+const spaceship = document.getElementById('spaceship');
+const scoreElement = document.getElementById('score-value');
+const livesElement = document.getElementById('lives-value');
+const gameOverElement = document.getElementById('game-over');
+const levelUpElement = document.getElementById('level-up');
+let score = 0;
+let lives = 3;
+let gameActive = true;
+let level = 1;
+let enemySpeed = 0.8;
+let enemySpawnRate = 100;
+let powerUpActive = false;
+let lastShotTime = 0;
+let shotCooldown = 150;
+let adInterval;
+let activeAds = [];
+let adCounter = 0;
+let secretMode = false;
+
+const adTypes = [
+  {
+    name: 'Neon Blast',
+    create: () => {
+      const ad = document.createElement('div');
+      ad.className = 'ad';
+      ad.style.background = 'linear-gradient(45deg, #ff00ff, #00ffff)';
+      ad.style.borderRadius = '20px';
+      ad.style.boxShadow = '0 0 20px #ff00ff, 0 0 40px #00ffff';
+      ad.innerHTML = `
+        <div class="ad-close" onclick="closeAd(this.parentNode)">X</div>
+        <h2 class="rainbow-text">NEON BLAST ENERGY DRINK</h2>
+        <p>Fuel your game with electric flavor!</p>
+        <button class="bounce" style="background-color: #ff00ff; color: #fff; border: none; padding: 10px 20px; font-size: 20px; border-radius: 10px;" onclick="closeAd(this.parentNode)">GET CHARGED!</button>
+      `;
+      return ad;
+    }
+  },
+  {
+    name: 'Space Pizza',
+    create: () => {
+      const ad = document.createElement('div');
+      ad.className = 'ad';
+      ad.style.background = 'radial-gradient(circle, #FFD700, #FFA500)';
+      ad.style.borderRadius = '50%';
+      ad.innerHTML = `
+        <div class="ad-close" onclick="closeAd(this.parentNode)">X</div>
+        <h2 class="spin" style="color: #8B4513;">SPACE PIZZA</h2>
+        <p>Out of this world flavor!</p>
+        <button class="pulse" style="background-color: #8B4513; color: #FFD700; border: none; padding: 10px 20px; font-size: 20px; border-radius: 25px;" onclick="closeAd(this.parentNode)">ORDER NOW</button>
+      `;
+      return ad;
+    }
+  },
+  {
+    name: 'Galactic Gadgets',
+    create: () => {
+      const ad = document.createElement('div');
+      ad.className = 'ad';
+      ad.style.background = 'linear-gradient(to right, #000000, #434343)';
+      ad.style.color = '#fff';
+      ad.style.borderRadius = '10px';
+      ad.style.border = '2px solid #00ff00';
+      ad.innerHTML = `
+        <div class="ad-close" onclick="closeAd(this.parentNode)">X</div>
+        <h2 style="text-shadow: 0 0 10px #00ff00;">GALACTIC GADGETS</h2>
+        <p>Upgrade your space arsenal!</p>
+        <button style="background-color: #00ff00; color: #000; border: none; padding: 10px 20px; font-size: 20px; border-radius: 5px;" onclick="closeAd(this.parentNode)">SHOP NOW</button>
+      `;
+      return ad;
+    }
+  },
+  {
+    name: 'Cosmic Cosmetics',
+    create: () => {
+      const ad = document.createElement('div');
+      ad.className = 'ad float';
+      ad.style.background = 'linear-gradient(to bottom right, #FF1493, #00BFFF)';
+      ad.style.borderRadius = '15px';
+      ad.style.color = '#fff';
+      ad.innerHTML = `
+        <div class="ad-close" onclick="closeAd(this.parentNode)">X</div>
+        <h2 style="font-family: cursive;">Cosmic Cosmetics</h2>
+        <p>Glow like a supernova!</p>
+        <button style="background-color: #FF1493; color: #fff; border: none; padding: 10px 20px; font-size: 20px; border-radius: 25px;" onclick="closeAd(this.parentNode)">SHINE NOW</button>
+      `;
+      return ad;
+    }
+  },
+  {
+    name: 'Alien Language Academy',
+    create: () => {
+      const ad = document.createElement('div');
+      ad.className = 'ad';
+      ad.style.background = 'url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDVMNSAwWk02IDRMNCA2Wk0tMSAxTDEgLTFaIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMSI+PC9wYXRoPgo8L3N2Zz4=)';
+      ad.style.color = '#000';
+      ad.style.fontFamily = 'monospace';
+      ad.innerHTML = `
+        <div class="ad-close" onclick="closeAd(this.parentNode)">X</div>
+        <h2 style="font-family: 'Courier New', monospace;">Alien Language Academy</h2>
+        <p>▲●■ Learn to ♦★✦ communicate!</p>
+        <button style="background-color: #000; color: #fff; border: none; padding: 10px 20px; font-size: 20px; font-family: 'Courier New', monospace;" onclick="closeAd(this.parentNode)">✧ENROLL✧</button>
+      `;
+      return ad;
+    }
+  }
+];
+
+function moveSpaceship(e) {
+  if (!gameActive) return;
+  const x = e.clientX || e.touches[0].clientX;
+  spaceship.style.left = `${Math.max(20, Math.min(gameContainer.clientWidth - 20, x))}px`;
+}
+
+function shootLaser() {
+  if (!gameActive) return;
+  const currentTime = Date.now();
+  if (currentTime - lastShotTime < shotCooldown) return;
+  lastShotTime = currentTime;
+
+  const laser = document.createElement('div');
+  laser.className = 'laser';
+  laser.style.left = `${parseInt(spaceship.style.left) + 19}px`;
+  laser.style.bottom = '60px';
+  gameContainer.appendChild(laser);
+  
+  setTimeout(() => {
+    laser.style.top = '0px';
+    setTimeout(() => laser.remove(), 200);
+  }, 0);
+}
+
+function createEnemy() {
+  if (!gameActive) return;
+  const enemy = document.createElement('div');
+  enemy.className = 'enemy';
+  enemy.style.left = `${Math.random() * (gameContainer.clientWidth - 25)}px`;
+  enemy.style.top = '-25px';
+  
+  const enemyType = Math.random() < 0.05 ? 'boss' : Math.random() < 0.4 ? 'fast' : 'normal';
+  let enemySvg;
+  
+  switch(enemyType) {
+    case 'boss':
+      enemySvg = `<svg viewBox="0 0 100 100"><path d="M10 90 L50 10 L90 90 L70 50 L30 50 Z" fill="#f00" /></svg>`;
+      break;
+    case 'fast':
+      enemySvg = `<svg viewBox="0 0 100 100"><path d="M10 90 L50 10 L90 90 L50 50 Z" fill="#ff0" /></svg>`;
+      break;
+    default:
+      enemySvg = `<svg viewBox="0 0 100 100"><path d="M10 90 L50 10 L90 90 Z" fill="#f00" /></svg>`;
+  }
+  
+  enemy.innerHTML = enemySvg;
+  enemy.dataset.type = enemyType;
+  
+  gameContainer.appendChild(enemy);
+  
+  const speed = enemyType === 'fast' ? enemySpeed * 1.5 : enemySpeed;
+  enemy.style.transition = `top ${speed}s linear`;
+  enemy.style.top = `${gameContainer.clientHeight}px`;
+  
+  if (enemyType === 'boss') {
+    enemy.style.width = '50px';
+    enemy.style.height = '50px';
+    zigzagMotion(enemy);
+  }
+  
+  const checkCollision = setInterval(() => {
+    const lasers = document.querySelectorAll('.laser');
+    lasers.forEach(laser => {
+      if (isColliding(laser, enemy)) {
+        if (enemy.dataset.type === 'boss' && !enemy.dataset.hit) {
+          enemy.dataset.hit = 'true';
+          enemy.style.opacity = '0.5';
+        } else {
+          clearInterval(checkCollision);
+          enemy.remove();
+          laser.remove();
+          score += enemy.dataset.type === 'boss' ? 100 : enemy.dataset.type === 'fast' ? 30 : 10;
+          scoreElement.textContent = score;
+          checkLevelUp();
+        }
+      }
+    });
+    
+    if (isColliding(spaceship, enemy)) {
+      clearInterval(checkCollision);
+      enemy.remove();
+      if (!powerUpActive && !secretMode) {
+        lives--;
+        livesElement.textContent = lives;
+        gameContainer.classList.add('shake');
+        setTimeout(() => gameContainer.classList.remove('shake'), 500);
+        if (lives <= 0) {
+          gameOver();
+        }
+      }
+    }
+  }, 20);
+  
+  setTimeout(() => {
+    if (enemy.parentNode === gameContainer) {
+      enemy.remove();
+      clearInterval(checkCollision);
+    }
+  }, speed * 1000);
+}
+
+function zigzagMotion(enemy) {
+  let direction = 1;
+  const zigzag = setInterval(() => {
+    if (!gameActive || !enemy.parentNode) {
+      clearInterval(zigzag);
+      return;
+    }
+    const currentLeft = parseInt(enemy.style.left);
+    enemy.style.left = `${currentLeft + direction * 40}px`;
+    direction *= -1;
+  }, 200);
+}
+
+function createPowerUp() {
+  if (!gameActive) return;
+  const powerUp = document.createElement('div');
+  powerUp.className = 'powerup';
+  powerUp.style.left = `${Math.random() * (gameContainer.clientWidth - 25)}px`;
+  powerUp.style.top = '-25px';
+  
+  const powerUpType = Math.random() < 0.4 ? 'shield' : Math.random() < 0.7 ? 'rapidFire' : 'multiShot';
+  let powerUpSvg;
+  
+  switch(powerUpType) {
+    case 'shield':
+      powerUpSvg = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#0f0" /></svg>`;
+      break;
+    case 'rapidFire':
+      powerUpSvg = `<svg viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="#00f" /></svg>`;
+      break;
+    case 'multiShot':
+      powerUpSvg = `<svg viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="#f0f" /></svg>`;
+      break;
+  }
+  
+  powerUp.innerHTML = powerUpSvg;
+  powerUp.dataset.type = powerUpType;
+  
+  gameContainer.appendChild(powerUp);
+  
+  powerUp.style.top = `${gameContainer.clientHeight}px`;
+  
+  const checkCollision = setInterval(() => {
+    if (isColliding(spaceship, powerUp)) {
+      clearInterval(checkCollision);
+      powerUp.remove();
+      activatePowerUp(powerUpType);
+    }
+  }, 20);
+  
+  setTimeout(() => {
+    if (powerUp.parentNode === gameContainer) {
+      powerUp.remove();
+      clearInterval(checkCollision);
+    }
+  }, 1500);
+}
+
+function activatePowerUp(type) {
+  powerUpActive = true;
+  switch(type) {
+    case 'shield':
+      spaceship.style.filter = 'drop-shadow(0 0 10px #0f0)';
+      setTimeout(() => {
+        powerUpActive = false;
+        spaceship.style.filter = 'none';
+      }, 5000);
+      break;
+    case 'rapidFire':
+      const originalCooldown = shotCooldown;
+      shotCooldown = 50;
+      setTimeout(() => {
+        shotCooldown = originalCooldown;
+        powerUpActive = false;
+      }, 5000);
+      break;
+    case 'multiShot':
+      const originalShootLaser = shootLaser;
+      shootLaser = () => {
+        originalShootLaser();
+        setTimeout(() => originalShootLaser(), 50);
+        setTimeout(() => originalShootLaser(), 100);
+      };
+      setTimeout(() => {
+        shootLaser = originalShootLaser;
+        powerUpActive = false;
+      }, 5000);
+      break;
+  }
+}
+
+function isColliding(el1, el2) {
+  const rect1 = el1.getBoundingClientRect();
+  const rect2 = el2.getBoundingClientRect();
+  return !(rect1.right < rect2.left || 
+           rect1.left > rect2.right || 
+           rect1.bottom < rect2.top || 
+           rect1.top > rect2.bottom);
+}
+
+function gameOver() {
+  gameActive = false;
+  gameOverElement.style.display = 'block';
+  clearInterval(adInterval);
+  activeAds.forEach(ad => ad.remove());
+  activeAds = [];
+}
+
+function restartGame() {
+  score = 0;
+  lives = 3;
+  level = 1;
+  enemySpeed = 0.8;
+  enemySpawnRate = 100;
+  scoreElement.textContent = score;
+  livesElement.textContent = lives;
+  gameOverElement.style.display = 'none';
+  levelUpElement.style.display = 'none';
+  gameActive = true;
+  document.querySelectorAll('.enemy, .laser, .powerup, .ad').forEach(el => el.remove());
+  activeAds = [];
+  adCounter = 0;
+  secretMode = false;
+  startGame();
+}
+
+function checkLevelUp() {
+  if (score >= level * 300) {
+    level++;
+    gameActive = false;
+    levelUpElement.style.display = 'block';
+    enemySpeed = Math.max(0.3, enemySpeed - 0.05);
+    enemySpawnRate = Math.max(50, enemySpawnRate - 5);
+  }
+}
+
+function continuePlaying() {
+  levelUpElement.style.display = 'none';
+  gameActive = true;
+}
+
+function createAd() {
+  if (!gameActive) return;
+  const adType = adTypes[Math.floor(Math.random() * adTypes.length)];
+  const ad = adType.create();
+  ad.style.left = `${Math.random() * (gameContainer.clientWidth - 300)}px`;
+  ad.style.top = `${Math.random() * (gameContainer.clientHeight - 200)}px`;
+  ad.style.width = `${250 + Math.random() * 200}px`;
+  ad.style.height = `${200 + Math.random() * 150}px`;
+  ad.style.animation = `moveAround ${3 + Math.random() * 3}s infinite alternate, blink 0.5s infinite alternate, pulse 1s infinite`;
+  gameContainer.appendChild(ad);
+  activeAds.push(ad);
+  
+  // Increase ad size and rotation over time
+  let size = 1;
+  let rotation = 0;
+  const growInterval = setInterval(() => {
+    if (!ad.parentNode || !gameActive) {
+      clearInterval(growInterval);
+      return;
+    }
+    size += 0.03;
+    rotation += 5;
+    ad.style.transform = `scale(${size}) rotate(${rotation}deg)`;
+    if (size >= 4) clearInterval(growInterval);
+  }, 100);
+}
+
+function closeAd(ad) {
+  ad.remove();
+  activeAds = activeAds.filter(a => a !== ad);
+}
+
+function startGame() {
+  const enemyInterval = setInterval(() => {
+    if (gameActive) {
+      createEnemy();
+      if (Math.random() < 0.3) createEnemy(); // 30% chance to spawn an additional enemy
+    }
+  }, enemySpawnRate);
+  
+  const powerUpInterval = setInterval(() => {
+    if (gameActive) createPowerUp();
+  }, 5000);
+  
+  adInterval = setInterval(() => {
+    if (gameActive) {
+      createAd();
+      // 50% chance to create an additional ad
+      if (Math.random() < 0.5) {
+        setTimeout(createAd, 500);
+      }
+    }
+  }, 3000);
+}
+
+function toggleSecretMode() {
+  secretMode = !secretMode;
+  if (secretMode) {
+    lives = Infinity;
+    livesElement.textContent = '∞';
+  } else {
+    lives = 3;
+    livesElement.textContent = '3';
+  }
+}
+
+gameContainer.addEventListener('mousemove', moveSpaceship);
+gameContainer.addEventListener('touchmove', moveSpaceship);
+gameContainer.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  shootLaser();
+});
+gameContainer.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  shootLaser();
+});
+
+// Continuous shooting while mouse/touch is held down
+let shootingInterval;
+gameContainer.addEventListener('mousedown', (e) => {
+  e.preventDefault();
+  shootLaser();
+  shootingInterval = setInterval(shootLaser, shotCooldown);
+});
+gameContainer.addEventListener('mouseup', () => {
+  clearInterval(shootingInterval);
+});
+gameContainer.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  shootLaser();
+  shootingInterval = setInterval(shootLaser, shotCooldown);
+});
+gameContainer.addEventListener('touchend', () => {
+  clearInterval(shootingInterval);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'h') {
+    toggleSecretMode();
+  }
+});
+
+startGame();
+</script>
+</body></html>
