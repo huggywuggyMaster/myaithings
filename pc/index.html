@@ -1,0 +1,495 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Language Transpiler to C++</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #2E3440; /* Dark background */
+            color: #ECEFF4; /* Light text */
+            line-height: 1.6;
+        }
+        h1 {
+            color: #81A1C1; /* Lighter blue for heading */
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .container {
+            display: flex;
+            gap: 25px; /* Slightly more space */
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
+            margin-bottom: 30px;
+        }
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #4C566A; /* Darker border */
+            border-radius: 10px; /* More rounded corners */
+            overflow: hidden;
+            background-color: #3B4252; /* Darker panel background */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* More pronounced shadow for dark mode */
+            transition: transform 0.2s ease-in-out;
+        }
+        .panel:hover {
+            transform: translateY(-3px); /* Subtle lift on hover */
+        }
+        .panel-header {
+            background-color: #434C5E; /* Even darker header background */
+            padding: 12px 20px;
+            font-weight: 600;
+            border-bottom: 1px solid #4C566A; /* Darker border */
+            color: #D8DEE9; /* Lighter text for header */
+        }
+        /* New styles for syntax highlighting */
+        .code-editor-container {
+            position: relative;
+            flex-grow: 1; /* Allows it to expand within panel */
+            min-height: 250px; /* Match textarea min-height */
+            display: flex; /* Use flex to ensure content fills container */
+            flex-direction: column;
+        }
+        .code-editor-container textarea,
+        .code-editor-container .highlighted-code-output {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 18px 20px;
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 15px;
+            line-height: 1.6; /* Important to match line-height */
+            box-sizing: border-box; /* Include padding in width/height */
+            white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+            overflow-wrap: break-word; /* Break long words */
+            /* Add this for scrolling, matched by JS */
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+        .code-editor-container textarea {
+            background-color: transparent; /* Make textarea transparent */
+            color: transparent; /* Hide text, caret remains visible */
+            caret-color: #ECEFF4; /* Visible caret color */
+            resize: vertical; /* Allow resizing */
+            z-index: 2; /* Place above the highlighted content */
+            border: none; /* Remove default textarea border */
+            outline: none; /* Remove default focus outline */
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .code-editor-container textarea:focus {
+            border-color: #88C0D0; /* Light blue highlight on focus */
+            box-shadow: 0 0 0 3px rgba(136, 192, 208, 0.25);
+        }
+        .code-editor-container .highlighted-code-output {
+            background-color: #4C566A; /* Same as original textarea background */
+            color: #ECEFF4; /* Default text color */
+            pointer-events: none; /* Prevent mouse events on overlay */
+            z-index: 1; /* Place below textarea */
+            border-radius: 0 0 10px 10px; /* Match panel bottom corners */
+        }
+
+        /* Syntax highlighting colors (Nord theme inspired) */
+        .syntax-token-KEYWORD { color: #81A1C1; font-weight: bold; } /* Blue */
+        .syntax-token-IDENTIFIER { color: #D8DEE9; } /* Light gray */
+        .syntax-token-NUMBER { color: #B48EAD; } /* Purple */
+        .syntax-token-OPERATOR { color: #EBCB8B; } /* Yellow */
+        .syntax-token-PUNCTUATION { color: #ECEFF4; } /* Lighter gray */
+        .syntax-token-COMMENT { color: #616E88; font-style: italic; } /* Darker gray, italic for comments */
+        .syntax-token-ERROR { color: #BF616A; background-color: #4C566A; } /* Red for errors, with dark background */
+        .syntax-token-STRING_LITERAL { color: #A3BE8C; } /* Green for strings */
+        .syntax-token-BOOLEAN_LITERAL { color: #8FBCBB; } /* Light teal/green for booleans */
+        .syntax-token-TYPE { color: #88C0D0; font-weight: bold; } /* Light blue for types */
+
+        /* Existing textarea styles for the output (no highlighting applied here) */
+        textarea#outputCode {
+            width: 100%;
+            flex-grow: 1;
+            border: none;
+            padding: 18px 20px; /* More padding */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 15px; /* Slightly larger font */
+            resize: vertical;
+            min-height: 250px; /* Ensure a minimum height */
+            outline: none; /* Remove default outline */
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background-color: #4C566A; /* Darker textarea background */
+            color: #ECEFF4; /* Light text */
+            border-radius: 0 0 10px 10px; /* Match panel bottom corners */
+        }
+        textarea#outputCode:focus {
+            border-color: #88C0D0; /* Light blue highlight on focus */
+            box-shadow: 0 0 0 3px rgba(136, 192, 208, 0.25);
+        }
+
+        button {
+            padding: 12px 25px; /* More padding */
+            margin-top: 20px;
+            background-color: #5E81AC; /* Nord blue for button */
+            color: white;
+            border: none;
+            border-radius: 8px; /* More rounded button */
+            cursor: pointer;
+            font-size: 17px; /* Slightly larger font */
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); /* Darker shadow */
+        }
+        button:hover {
+            background-color: #81A1C1; /* Lighter nord blue on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .documentation-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #3B4252; /* Darker documentation background */
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .documentation-section h2 {
+            color: #81A1C1; /* Lighter blue for heading */
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .documentation-section h3 {
+            color: #D8DEE9; /* Lighter text for subheadings */
+            margin-top: 30px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .documentation-section p {
+            margin-bottom: 15px;
+            color: #D8DEE9; /* Light text */
+        }
+        .documentation-section ul {
+            list-style-type: disc;
+            margin-left: 25px;
+            margin-bottom: 15px;
+            color: #D8DEE9; /* Light text */
+        }
+        .documentation-section pre {
+            background-color: #282c34; /* Even darker for code blocks */
+            border: 1px solid #4C566A; /* Darker border */
+            border-radius: 6px;
+            padding: 15px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ABB2BF; /* Soft gray for code text */
+        }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "transpiler": "./transpiler.js"
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Simple Language Transpiler</h1>
+    <div class="container">
+        <div class="panel">
+            <div class="panel-header">Simple Language Code</div>
+            <div class="code-editor-container">
+                <div id="syntaxHighlightedInput" class="highlighted-code-output"></div>
+                <textarea id="inputCode" spellcheck="false" placeholder="Enter your simple language code here...
+Example:
+myVar = 10
+text:string = "Hello World" // Explicit string type
+num:int = 50 // Explicit int type
+pi:float = 3.14159 // Explicit float type
+PRINT myVar
+PRINT text
+// Semicolons are optional and can still be used:
+anotherVar = 20;
+PRINT anotherVar;
+
+function greet(name, age)
+  PRINT '--- Inside greet function ---'
+  PRINT 'Name:'
+  PRINT name
+  PRINT 'Age:'
+  PRINT age
+  _cpp_('// C++ custom code inside function')
+end
+"></textarea>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header">Transpiled C++ Code</div>
+            <textarea id="outputCode" readonly spellcheck="false" placeholder="Transpiled C++ code will appear here..."></textarea>
+        </div>
+    </div>
+    <button id="transpileButton">Transpile to C++</button>
+
+    <section class="documentation-section">
+        <h2>Language Documentation</h2>
+
+        <h3>Introduction</h3>
+        <p>This tool allows you to write simple programs in a custom language and transpile them into equivalent C++ code. The transpiled C++ code can then be compiled and run using a standard C++ compiler (like g++).</p>
+
+        <h3>Language Syntax</h3>
+        <p>The simple language supports basic variable declarations, printing values, direct C++ code injection, function definitions, calls and return statements, and now arithmetic operations. Each statement now optionally ends with a semicolon (<code>;</code>). Newlines are implicitly treated as statement separators.</p>
+        <ul>
+            <li>
+                <strong>Variable Declaration/Assignment: <code>identifier [ : type ] = value</code></strong>
+                <p>Declares or assigns a value to a variable. The type is inferred from the assigned value if no explicit type is provided (e.g., <code>myVar = 10</code>). Optionally, you can explicitly declare the variable's type using a colon (<code>:</code>) followed by the type keyword (<code>int</code>, <code>float</code>, <code>string</code>, or <code>bool</code>). If an explicit type is given, the assigned value's type must be compatible with the declared type.</p>
+                <p>The <code>value</code> can be a numeric literal, a string literal (enclosed in double quotes), a boolean literal (<code>true</code> or <code>false</code>), another already declared variable, the result of a function call, or an arithmetic expression.</p>
+                <p>Example:</p>
+                <pre>myNumber = 100             // Type inferred as int
+greeting:string = "Hello"  // Explicit string type
+isActive:bool = true       // Explicit boolean type
+version:float = 1.25       // Explicit float type
+newVar = myNumber;
+sum = add(10, 20)
+calculatedValue:int = (5 + 3) * 2 / 4 - 1 // Result must be compatible with int</pre>
+            </li>
+            <li>
+                <strong>Print Statement: <code>PRINT value</code></strong>
+                <p>Prints the value to the console. The <code>value</code> can be a numeric literal, a string literal (enclosed in double quotes), a boolean literal (<code>true</code> or <code>false</code>), a variable, the result of a function call, or an arithmetic expression.</p>
+                <p>Example:</p>
+                <pre>PRINT 42
+PRINT myNumber
+PRINT "Done!"
+PRINT isActive;
+PRINT calculateArea(5, 10)
+PRINT 10 * (5 + 2)</pre>
+            </li>
+            <li>
+                <strong>Raw C++ Injection: <code>_cpp_("your C++ code here")</code></strong>
+                <p>Allows you to inject raw C++ code directly into the transpiled output. The content within the double quotes will be placed as-is into the <code>main</code> function or a custom function body of the generated C++ file. Ensure all necessary C++ syntax, including semicolons for C++ statements, is present within the string.</p>
+                <p>Example:</p>
+                <pre>_cpp_("std::cout << \"Hello from direct C++!\" << std::endl;")
+_cpp_("int localVariable = 50;")
+_cpp_("if (localVariable > 10) { std::cout << \"Local var is large.\" << std::endl; }")</pre>
+            </li>
+            <li>
+                <strong>Function Definition: <code>function functionName([param: type], ...) [ : returnType ] ... end</code></strong>
+                <p>Defines a new function. Functions are declared with the <code>function</code> keyword, followed by the function name, and then a list of parameters in parentheses. Each parameter can optionally specify its type (e.g., <code>param:int</code>). If a parameter type is omitted, it defaults to <code>int</code>. Optionally, the function's return type can be specified after the parameters using a colon (<code>:</code>) followed by the type keyword. If no return type is specified, it defaults to <code>void</code> if no <code>return</code> statements are present, or inferred from the first <code>return</code> statement's value.</p>
+                <p>The function body contains statements, and it must be closed with the <code>end</code> keyword.</p>
+                <p>Example:</p>
+                <pre>function displayMessage(msg:string, count:int)
+  PRINT "--- Function Start ---"
+  PRINT msg
+  counter = count
+  PRINT counter
+  _cpp_("std::cout << \"Message displayed \" << count << \" times.\\n\";")
+  PRINT "--- Function End ---"
+end
+
+function add(a:int, b:int): int
+  result = a + b
+  return result
+end
+
+function getGreeting(): string
+  return "Hello there!"
+end</pre>
+            </li>
+            <li>
+                <strong>Function Call: <code>functionName(arg1, arg2, ...)</code></strong>
+                <p>Calls a defined function. Arguments can be numeric literals, string literals, boolean literals, variables, or expressions. Function calls can be standalone statements or used within <code>PRINT</code> statements or variable assignments.</p>
+                <p>Example:</p>
+                <pre>callMe(10)
+myString = "Test"
+processData(myNumber, myString, true)
+result = calculate(10 + 5, 20 / 4)</pre>
+            </li>
+            <li>
+                <strong>Return Statement: <code>return value</code></strong>
+                <p>Used inside a function to return a value. If the function has an explicit return type, the returned value's type must be compatible. If no explicit return type is given, the function's return type in C++ is inferred from the type of the value returned by the first <code>return</code> statement encountered in its body. All subsequent <code>return</code> statements in the same function must return values of compatible types. If no <code>return</code> statement is present in a function without an explicit return type, the function will have a <code>void</code> return type in C++.</p>
+                <p>Example:</p>
+                <pre>function add(a, b)
+  result = a + b
+  return result
+end
+
+function getGreeting()
+  return "Hello there!"
+end
+
+function isPositive(num)
+  IF num > 0 THEN
+    return true
+  ELSE
+    return false
+  END
+end</pre>
+            </li>
+            <li>
+                <strong>Arithmetic Operations: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>( )</code></strong>
+                <p>Supports basic arithmetic operations with standard operator precedence (multiplication/division before addition/subtraction) and parentheses for grouping. The <code>+</code> operator can also be used for string concatenation if both operands are strings. Other operators (<code>-</code>, <code>*</code>, <code>/</code>) only work with numbers.</p>
+                <p>Example:</p>
+                <pre>x = 10
+y = 5
+sum = x + y          // 15
+diff = x - y         // 5
+prod = x * y         // 50
+quot = x / y         // 2 (integer division)
+complex = (x + y) * 2 - (prod / 10) // (10+5)*2 - (50/10) = 15*2 - 5 = 25
+myString = "Hello, " + "world!" // String concatenation</pre>
+            </li>
+        </ul>
+
+        <h3>How to Use</h3>
+        <ol>
+            <li>Enter your simple language code into the "Simple Language Code" text area on the left.</li>
+            <li>Click the "Transpile to C++" button.</li>
+            <li>The equivalent C++ code will appear in the "Transpiled C++ Code" text area on the right.</li>
+            <li>You can then copy the C++ code and compile it with any C++ compiler (e.g., <code>g++ your_code.cpp -o your_program</code> and then <code>./your_program</code>).</li>
+        </ol>
+
+        <h3>Quick Example</h3>
+        <pre>quantity = 5
+price = 10
+totalCost = quantity * price // 50
+message:string = "Program finished!" // Explicit string
+isComplete:bool = true
+
+function calculateAndPrint(val1:int, val2:float): float
+  localSum:int = val1 + val2 // Explicit int
+  anotherVar:float = val2 * 2.5 // Explicit float, mixes with int
+  PRINT "--- Inside calculateAndPrint ---"
+  PRINT localSum
+  PRINT anotherVar
+  _cpp_("std::cout << \"Calculations done in C++.\\n\";")
+  return localSum + (anotherVar / 4)
+end
+
+function greet(name:string): string
+  return "Hello, " + name + "!"
+end
+
+_cpp_("std::cout << \"Initiating main program...\" << std::endl;")
+PRINT totalCost
+PRINT price
+PRINT message
+PRINT isComplete;
+resultOfCalc = calculateAndPrint(100, 200.5)
+PRINT "Result of calculation function:"
+PRINT resultOfCalc
+myGreeting = greet("World")
+PRINT myGreeting
+_cpp_("std::cout << \"Main program fully initialized.\" << std::endl;")</pre>
+    </section>
+
+    <script type="module">
+        import { transpile, tokenize } from 'transpiler'; // Import tokenize for highlighting
+
+        const inputCodeElement = document.getElementById('inputCode');
+        const outputCodeElement = document.getElementById('outputCode');
+        const transpileButton = document.getElementById('transpileButton');
+        const syntaxHighlightedInput = document.getElementById('syntaxHighlightedInput');
+
+        // Helper to escape HTML for display
+        const escapeHtml = (unsafe) => {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+
+        // Function to apply syntax highlighting
+        const highlightCode = (code) => {
+            try {
+                // Use the tokenizer to get tokens. It now handles comments and errors.
+                const tokens = tokenize(code);
+                let highlightedHtml = '';
+                tokens.forEach(token => {
+                    const escapedValue = escapeHtml(token.value);
+                    if (token.type !== 'WHITESPACE') { // Don't wrap whitespace in spans
+                        highlightedHtml += `<span class="syntax-token-${token.type}">${escapedValue}</span>`;
+                    } else {
+                        highlightedHtml += escapedValue; // Just add raw whitespace
+                    }
+                });
+                return highlightedHtml;
+            } catch (e) {
+                // Fallback to plain text if tokenization fails unexpectedly (though it should now return ERROR tokens)
+                console.error("Highlighting error:", e);
+                return escapeHtml(code);
+            }
+        };
+
+        // Event listener for transpilation
+        transpileButton.addEventListener('click', () => {
+            const inputCode = inputCodeElement.value;
+            outputCodeElement.value = transpile(inputCode);
+        });
+
+        // Event listener for input changes to update highlighting
+        inputCodeElement.addEventListener('input', () => {
+            syntaxHighlightedInput.innerHTML = highlightCode(inputCodeElement.value);
+        });
+
+        // Synchronize scroll positions
+        inputCodeElement.addEventListener('scroll', () => {
+            syntaxHighlightedInput.scrollTop = inputCodeElement.scrollTop;
+            syntaxHighlightedInput.scrollLeft = inputCodeElement.scrollLeft;
+        });
+
+        // Set initial example code and trigger transpilation & highlighting on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialCode = `myVar = 10
+anotherVar:float = myVar + 5.5 * 2
+text:string = "Hello from transpiler!"
+isReady:bool = true
+hasError = false // Inferred bool
+
+function myFunction(paramA:int, paramB:int): int
+  funcVar:int = 100
+  PRINT "Inside myFunction:"
+  PRINT paramA
+  PRINT paramB
+  PRINT funcVar - 5
+  _cpp_("std::cout << \"This is C++ inside the function.\\n\";")
+  anotherFuncVar = "Function string"
+  PRINT anotherFuncVar + " " + (paramA * paramB)
+  return funcVar + paramA
+end
+
+function add(a:int, b:int): int
+    PRINT "Adding numbers..."
+    sum = a + b
+    return sum
+end
+
+x:int = 1
+y:float = x / 2.0 // Result is float
+PRINT y
+_cpp_("std::cout << \"Injected code after global vars.\\n\";")
+
+myFunction(5, 20) // Calling the function as a statement
+result:int = add(myVar, 50) // Calling function and assigning result with explicit type
+PRINT "Result of add function:"
+PRINT result
+PRINT "Total calculated: " + (result * 2 - (10 / 2))
+`;
+            inputCodeElement.value = initialCode;
+            syntaxHighlightedInput.innerHTML = highlightCode(initialCode); // Initial highlight
+            transpileButton.click(); // Initial transpilation
+        });
+    </script>
+</body>
+</html>
