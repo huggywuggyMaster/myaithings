@@ -1,0 +1,12 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center; /* horizontal zentrieren */
+    align-items: center;     /* vertikal zentrieren */
+    margin: 0;
+}
+
+img {
+    width: 50%;
+    /* display: block und margin: auto sind bei flex nicht mehr nötig */
+}
