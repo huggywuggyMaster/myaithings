@@ -5,7 +5,7 @@ function playFish() {
     document.body.appendChild(btn);
 
     // Audio vorbereiten
-    const audio = new Audio('fish.mp3');
+    const audio = new Audio('I am just a fish (alternate ver.).m4a');
     audio.loop = true;
 
     // Beim Klick: Audio abspielen, Button entfernen, Bild anzeigen
